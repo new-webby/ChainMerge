@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chainmerge-sdk"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python SDK for the ChainMerge multichain transaction decoder API."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,13 +26,14 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/I-lost-everytime/Chaincodec"
-Repository = "https://github.com/I-lost-everytime/Chaincodec"
-Issues = "https://github.com/I-lost-everytime/Chaincodec/issues"
+Homepage = "https://github.com/I-lost-everytime/ChainMerge"
+Repository = "https://github.com/I-lost-everytime/ChainMerge"
+Issues = "https://github.com/I-lost-everytime/ChainMerge/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["chainmerge_sdk*"]
+include = ["chainmerge_sdk*", "chaincodec_sdk*"]
 
 [tool.setuptools.package-data]
 chainmerge_sdk = ["py.typed"]
+chaincodec_sdk = ["py.typed"]

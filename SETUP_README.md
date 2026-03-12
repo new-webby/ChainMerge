@@ -22,8 +22,8 @@ git --version
 ## 2) Clone Repository
 
 ```bash
-git clone https://github.com/I-lost-everytime/Chaincodec.git
-cd Chaincodec
+git clone https://github.com/I-lost-everytime/ChainMerge.git
+cd ChainMerge
 ```
 
 ## 3) Configure Environment

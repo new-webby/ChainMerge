@@ -32,12 +32,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/I-lost-everytime/Chaincodec.git"
+    "url": "git+https://github.com/I-lost-everytime/ChainMerge.git"
   },
   "bugs": {
-    "url": "https://github.com/I-lost-everytime/Chaincodec/issues"
+    "url": "https://github.com/I-lost-everytime/ChainMerge/issues"
   },
-  "homepage": "https://github.com/I-lost-everytime/Chaincodec#readme",
+  "homepage": "https://github.com/I-lost-everytime/ChainMerge#readme",
   "devDependencies": {
     "typescript": "^5.6.3"
   }
