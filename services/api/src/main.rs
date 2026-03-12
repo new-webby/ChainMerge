@@ -20,7 +20,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
-use chaincodec::{
+use chainmerge::{
     decode_transaction,
     errors::{DecodeError, ErrorCode, ErrorEnvelope},
     types::{Chain, DecodeRequest, NormalizedTransaction},
@@ -29,7 +29,7 @@ use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::info;
+use tracing::{info, warn};
 
 #[derive(Clone)]
 struct AppState {
@@ -180,12 +180,23 @@ impl IntoResponse for ApiError {
 
 #[tokio::main]
 async fn main() {
+    // Load local .env (searches current dir and parents) so keys are available
+    // even when the process is launched without shell-level exports.
+    let _ = dotenvy::dotenv();
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "chaincodec_api=info".into()),
+                .unwrap_or_else(|_| "chainmerge_api=info".into()),
         )
         .init();
+
+    if std::env::var("POLKADOT_SUBSCAN_API_KEY")
+        .map(|v| v.trim().is_empty())
+        .unwrap_or(true)
+    {
+        warn!("POLKADOT_SUBSCAN_API_KEY is not set; Polkadot decode may fail");
+    }
 
     let app = app();
 
@@ -199,7 +210,7 @@ async fn main() {
         .parse()
         .expect("invalid HOST/PORT combination");
 
-    info!(%addr, "chaincodec-api listening");
+    info!(%addr, "chainmerge-api listening");
 
     let listener = tokio::net::TcpListener::bind(addr)
         .await
@@ -329,7 +340,7 @@ async fn guard_middleware(
 async fn health_handler() -> Json<HealthHttpResponse> {
     Json(HealthHttpResponse {
         status: "ok",
-        service: "chaincodec-api",
+        service: "chainmerge-api",
     })
 }
 
@@ -357,7 +368,7 @@ async fn examples_handler() -> Json<ExamplesHttpResponse> {
 
 async fn metrics_handler(State(state): State<AppState>) -> String {
     format!(
-        "chaincodec_requests_total {}\nchaincodec_decode_requests_total {}\nchaincodec_decode_success_total {}\nchaincodec_decode_errors_total {}\nchaincodec_indexed_transactions_total {}\n",
+        "chainmerge_requests_total {}\nchainmerge_decode_requests_total {}\nchainmerge_decode_success_total {}\nchainmerge_decode_errors_total {}\nchainmerge_indexed_transactions_total {}\n",
         state.metrics.total_requests.load(Ordering::Relaxed),
         state.metrics.decode_requests.load(Ordering::Relaxed),
         state.metrics.decode_success.load(Ordering::Relaxed),
@@ -404,14 +415,14 @@ fn resolve_rpc_url(chain: Chain, request_rpc_url: Option<String>) -> Result<Stri
     }
 
     let chain_env_key = match chain {
-        Chain::Ethereum => "CHAINCODEC_RPC_URL_ETHEREUM",
-        Chain::Solana => "CHAINCODEC_RPC_URL_SOLANA",
-        Chain::Cosmos => "CHAINCODEC_RPC_URL_COSMOS",
-        Chain::Aptos => "CHAINCODEC_RPC_URL_APTOS",
-        Chain::Sui => "CHAINCODEC_RPC_URL_SUI",
-        Chain::Polkadot => "CHAINCODEC_RPC_URL_POLKADOT",
-        Chain::Bitcoin => "CHAINCODEC_RPC_URL_BITCOIN",
-        Chain::Starknet => "CHAINCODEC_RPC_URL_STARKNET",
+        Chain::Ethereum => "CHAINMERGE_RPC_URL_ETHEREUM",
+        Chain::Solana => "CHAINMERGE_RPC_URL_SOLANA",
+        Chain::Cosmos => "CHAINMERGE_RPC_URL_COSMOS",
+        Chain::Aptos => "CHAINMERGE_RPC_URL_APTOS",
+        Chain::Sui => "CHAINMERGE_RPC_URL_SUI",
+        Chain::Polkadot => "CHAINMERGE_RPC_URL_POLKADOT",
+        Chain::Bitcoin => "CHAINMERGE_RPC_URL_BITCOIN",
+        Chain::Starknet => "CHAINMERGE_RPC_URL_STARKNET",
     };
 
     if let Ok(url) = std::env::var(chain_env_key) {
@@ -421,7 +432,7 @@ fn resolve_rpc_url(chain: Chain, request_rpc_url: Option<String>) -> Result<Stri
         }
     }
 
-    if let Ok(url) = std::env::var("CHAINCODEC_RPC_URL") {
+    if let Ok(url) = std::env::var("CHAINMERGE_RPC_URL") {
         let trimmed = url.trim();
         if !trimmed.is_empty() {
             return Ok(trimmed.to_string());
@@ -559,7 +570,7 @@ mod tests {
         body::Body,
         http::{Request, StatusCode},
     };
-    use chaincodec::types::Chain;
+    use chainmerge::types::Chain;
     use tower::util::ServiceExt;
 
     use super::{app_with_config, resolve_rpc_url};
@@ -569,7 +580,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("time")
             .as_nanos();
-        format!("/tmp/chaincodec-index-test-{nanos}.db")
+        format!("/tmp/chainmerge-index-test-{nanos}.db")
     }
 
     #[tokio::test]
@@ -707,8 +718,8 @@ mod tests {
 
     #[test]
     fn resolve_rpc_url_uses_chain_default() {
-        std::env::remove_var("CHAINCODEC_RPC_URL_ETHEREUM");
-        std::env::remove_var("CHAINCODEC_RPC_URL");
+        std::env::remove_var("CHAINMERGE_RPC_URL_ETHEREUM");
+        std::env::remove_var("CHAINMERGE_RPC_URL");
 
         let resolved =
             resolve_rpc_url(Chain::Ethereum, None).expect("rpc url resolution should work");

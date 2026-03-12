@@ -1,11 +1,11 @@
-ChainCodec & ChainKit
+ChainMerge & ChainKit
 A Unified Multichain Data Decoding and Infrastructure Layer
 
 1. Introduction
 The blockchain ecosystem has rapidly evolved into a multi-chain world. Developers no longer build applications on a single blockchain. Instead, modern decentralized applications interact with multiple chains such as Ethereum, Solana, Cosmos, Polkadot, Aptos, Sui, Bitcoin, and StarkNet.
 However, each blockchain ecosystem has its own data formats, encoding systems, transaction structures, and event models. This creates a major challenge for developers building multichain infrastructure, analytics tools, wallets, and DeFi applications.
 Every time a new chain is added to a project, developers must rebuild the entire data decoding and parsing layer, increasing development complexity and maintenance cost.
-This project aims to solve this fragmentation by introducing ChainCodec and ChainKit, a unified foundation layer for decoding and interacting with multiple blockchain networks.
+This project aims to solve this fragmentation by introducing ChainMerge and ChainKit, a unified foundation layer for decoding and interacting with multiple blockchain networks.
 
 2. Problem Statement
 2.1 Fragmented Blockchain Data Encoding
@@ -55,16 +55,16 @@ These developers require normalized blockchain data before they can build useful
 
 4. Proposed Solution
 To address this fragmentation problem, this project proposes a unified blockchain decoding and infrastructure layer composed of two parts:
-ChainCodec (Core Decoder Layer)
+ChainMerge (Core Decoder Layer)
 ChainKit (Infrastructure Toolkit)
 Together they create a standardized way to interact with blockchain transaction data across multiple networks.
 
 5. Project Vision (Full Version)
-ChainCodec + ChainKit (Full Infrastructure)
+ChainMerge + ChainKit (Full Infrastructure)
 The complete project aims to become a foundation layer for multichain development, simplifying blockchain data access and decoding.
-ChainCodec
-ChainCodec acts as a universal blockchain decoder capable of interpreting transactions from multiple chains and converting them into a standardized data format.
-Instead of writing separate parsers for each chain, developers can simply use ChainCodec.
+ChainMerge
+ChainMerge acts as a universal blockchain decoder capable of interpreting transactions from multiple chains and converting them into a standardized data format.
+Instead of writing separate parsers for each chain, developers can simply use ChainMerge.
 Example:
 Input:
 Raw blockchain transaction
@@ -110,12 +110,12 @@ A lightweight indexing engine capable of:
 Project Vision
 The long-term goal is to build a universal foundation layer for multichain infrastructure where developers can interact with any blockchain using a consistent API and data structure.
 
-6. Hackathon Implementation (ChainCodec Lite)
-Since the full project scope is large, a simplified version called ChainCodec Lite will be developed for the hackathon.
+6. Hackathon Implementation (ChainMerge Lite)
+Since the full project scope is large, a simplified version called ChainMerge Lite will be developed for the hackathon.
 This version focuses only on the core decoding problem.
 
-ChainCodec Lite Overview
-ChainCodec Lite will be a universal transaction decoder supporting a limited number of blockchains.
+ChainMerge Lite Overview
+ChainMerge Lite will be a universal transaction decoder supporting a limited number of blockchains.
 Supported Chains
 • Ethereum
 • Solana
@@ -168,7 +168,7 @@ SPL Transfer
 Cosmos
 Coin Transfer
 
-ChainCodec converts all of them into a single unified event format.
+ChainMerge converts all of them into a single unified event format.
 Example:
 {
  type: "token_transfer",
@@ -224,7 +224,7 @@ Cosmos → Protobuf decoding tools
 
 Backend
 Node.js / Express
-Used for building the API that interacts with ChainCodec.
+Used for building the API that interacts with ChainMerge.
 
 Frontend
 React.js
@@ -247,7 +247,7 @@ User Interface
 API Layer
       |
       v
-ChainCodec Core
+ChainMerge Core
       |
   ┌───┼──────────────┐
   |   |              |
@@ -259,7 +259,7 @@ Normalized Output
 
 
 11. Expected Impact
-If successfully developed, ChainCodec and ChainKit could significantly improve the developer experience in the blockchain ecosystem.
+If successfully developed, ChainMerge and ChainKit could significantly improve the developer experience in the blockchain ecosystem.
 Benefits include:
 • faster multichain development
 • reduced infrastructure complexity
@@ -269,7 +269,7 @@ Developers could build multichain applications without rewriting their parsing l
 
 12. Conclusion
 The rapid expansion of the blockchain ecosystem has created a significant challenge for developers building multichain applications.
-ChainCodec and ChainKit aim to address this challenge by creating a unified decoding and infrastructure layer that standardizes blockchain transaction data across multiple networks.
+ChainMerge and ChainKit aim to address this challenge by creating a unified decoding and infrastructure layer that standardizes blockchain transaction data across multiple networks.
 While the full vision includes RPC layers, indexing systems, and standardized error decoding, the hackathon implementation focuses on demonstrating the core concept of universal transaction decoding.
 By simplifying how developers interact with blockchain data, this project has the potential to become a foundational tool for the future of multichain development.
 
@@ -278,7 +278,7 @@ By simplifying how developers interact with blockchain data, this project has th
 
 11. Current Implementation Status (Repository)
 This repository currently implements a Rust-first stack:
-- Core decoder: Rust (`core/chaincodec`)
+- Core decoder: Rust (`core/chainmerge`)
 - Backend API: Rust + Axum (`services/api`)
 - Frontend: React + Vite (`apps/web`)
 

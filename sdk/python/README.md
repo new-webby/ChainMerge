@@ -1,16 +1,23 @@
-# chaincodec-sdk (Python)
+# chainmerge-sdk (Python)
 
-Python SDK for the ChainCodec multichain transaction decoder API.
+Python SDK for the ChainMerge multichain transaction decoder API.
 
-ChainCodec normalizes transactions from multiple chains (Ethereum, Solana, Cosmos, Aptos, Sui, Polkadot, Bitcoin, Starknet) into a single JSON shape.
+Use this SDK to call `GET /api/decode` and get a normalized transaction object across multiple chains.
 
-## Installation
+## Requirements
+
+- Python `3.9+`
+- A running ChainMerge API instance (`base_url`)
+
+## Install
+
+From PyPI:
 
 ```bash
-pip install chaincodec-sdk
+pip install chainmerge-sdk
 ```
 
-For local development from this repository:
+From this repository (editable install):
 
 ```bash
 cd sdk/python
@@ -20,11 +27,12 @@ python3 -m pip install -e .
 ## Quick Start
 
 ```python
-from chaincodec_sdk import ChainCodecClient
+from chainmerge_sdk import ChainMergeClient
 
-client = ChainCodecClient(
+client = ChainMergeClient(
     base_url="http://127.0.0.1:8080",
     # api_key="optional-api-key",
+    timeout=15.0,
 )
 
 tx = client.decode_tx(
@@ -32,59 +40,128 @@ tx = client.decode_tx(
     tx_hash="0xd5d0587189f3411699ae946baa2a7d3ebfaf13133f9014a22bab6948591611ad",
 )
 
-print(tx.chain, tx.tx_hash)
-for event in tx.events:
-    if event.event_type == "token_transfer":
-        print(event.token, event.amount, event.from_address, event.to_address)
+print("chain:", tx.chain)
+print("tx_hash:", tx.tx_hash)
+print("sender:", tx.sender)
+print("receiver:", tx.receiver)
+
+for action in tx.actions:
+    print(action.action_type, action.token, action.amount)
 ```
 
-## API
+## Use a Custom RPC URL
 
-### `ChainCodecClient`
+Pass `rpc_url` when you want to override the backend default RPC endpoint for a specific request.
 
 ```python
-ChainCodecClient(
+tx = client.decode_tx(
+    chain="polkadot",
+    tx_hash="0xyour_tx_hash",
+    rpc_url="https://polkadot.api.subscan.io",
+)
+```
+
+## Error Handling
+
+```python
+from chainmerge_sdk import (
+    ChainMergeAPIError,
+    ChainMergeClient,
+    ChainMergeTransportError,
+)
+
+client = ChainMergeClient(base_url="http://127.0.0.1:8080")
+
+try:
+    tx = client.decode_tx(chain="ethereum", tx_hash="0x...")
+except ChainMergeAPIError as err:
+    # API returned non-2xx
+    print("api error:", err)
+    print("status_code:", err.status_code)
+    print("code:", err.code)
+    print("retryable:", err.retryable)
+except ChainMergeTransportError as err:
+    # Network issue or invalid JSON payload
+    print("transport error:", err)
+```
+
+## Returned Data Shape
+
+`decode_tx()` returns `NormalizedTransaction` with:
+
+- `chain: str`
+- `tx_hash: str`
+- `sender: str | None`
+- `receiver: str | None`
+- `value: str | None`
+- `events: list[NormalizedEvent]`
+- `actions: list[Action]`
+
+`NormalizedEvent` fields:
+
+- `event_type`
+- `token`
+- `from_address`
+- `to_address`
+- `amount`
+- `raw_program`
+
+`Action` fields:
+
+- `action_type`
+- `from_address`
+- `to_address`
+- `amount`
+- `token`
+- `metadata`
+
+## Supported Chains
+
+- `solana`
+- `ethereum`
+- `cosmos`
+- `aptos`
+- `sui`
+- `polkadot`
+- `bitcoin`
+- `starknet`
+
+Passing an unsupported chain raises `ValueError`.
+
+## API Reference
+
+```python
+from chainmerge_sdk import ChainMergeClient
+
+client = ChainMergeClient(
     base_url: str,
     api_key: str | None = None,
     timeout: float = 15.0,
 )
+
+tx = client.decode_tx(
+    chain: str,
+    tx_hash: str,
+    rpc_url: str | None = None,
+)
 ```
 
-- `base_url`: ChainCodec API base URL (`http://127.0.0.1:8080`, etc.).
-- `api_key`: Optional API key sent as `x-api-key`.
-- `timeout`: Request timeout in seconds.
-
-### `client.decode_tx(...)`
+JavaScript-style alias is also available:
 
 ```python
-decode_tx(chain: str, tx_hash: str, rpc_url: str | None = None) -> NormalizedTransaction
+tx = client.decodeTx(chain="ethereum", hash="0x...", rpcUrl=None)
 ```
 
-- `chain`: `solana|ethereum|cosmos|aptos|sui|polkadot|bitcoin|starknet`
-- `tx_hash`: transaction hash string
-- `rpc_url`: optional per-request RPC URL override
-
-### Errors
-
-Non-2xx API responses raise `ChainCodecAPIError` with:
-- `status_code`
-- `code` (backend error code, when present)
-- `retryable` (when present)
-
-Network and JSON decode issues raise `ChainCodecTransportError`.
-
-## Publishing
+## Local Development
 
 From `sdk/python`:
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install --upgrade build twine
+python -m pip install --upgrade pip
+python -m pip install -e .
 python -m unittest discover -s tests -v
-python -m build
-python -m twine check dist/*
-python -m twine upload dist/*
 ```
 
 ## GitHub Actions Publish

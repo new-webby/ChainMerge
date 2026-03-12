@@ -1,6 +1,6 @@
-# ChainCodec Final README
+# ChainMerge Final README
 
-ChainCodec is a multichain transaction decoder.
+ChainMerge is a multichain transaction decoder.
 It accepts chain-specific transaction identifiers and returns one normalized response shape.
 
 ## Overview
@@ -8,7 +8,7 @@ It accepts chain-specific transaction identifiers and returns one normalized res
 Problem solved:
 - Multichain apps usually maintain separate parser logic per chain.
 
-What ChainCodec does:
+What ChainMerge does:
 - Decodes chain-specific transaction payloads.
 - Normalizes outputs into a common schema.
 - Exposes a single HTTP API for decode and indexed lookup.
@@ -42,7 +42,7 @@ Core value:
 
 ## Architecture
 
-### 1) Core Decoder (`core/chaincodec`)
+### 1) Core Decoder (`core/chainmerge`)
 
 - Language: Rust
 - Role:
@@ -106,7 +106,7 @@ Core value:
 │       ├── package.json
 │       └── vite.config.ts
 ├── core/
-│   └── chaincodec/
+│   └── chainmerge/
 │       ├── src/
 │       │   ├── chains/
 │       │   ├── chainrpc/
@@ -168,15 +168,15 @@ Open:
 - `RATE_LIMIT_PER_MIN`
 - `INDEX_DB_PATH`
 - `POLKADOT_SUBSCAN_API_KEY`
-- `CHAINCODEC_RPC_URL` (global override)
-- `CHAINCODEC_RPC_URL_ETHEREUM`
-- `CHAINCODEC_RPC_URL_SOLANA`
-- `CHAINCODEC_RPC_URL_COSMOS`
-- `CHAINCODEC_RPC_URL_APTOS`
-- `CHAINCODEC_RPC_URL_SUI`
-- `CHAINCODEC_RPC_URL_POLKADOT`
-- `CHAINCODEC_RPC_URL_BITCOIN`
-- `CHAINCODEC_RPC_URL_STARKNET`
+- `CHAINMERGE_RPC_URL` (global override)
+- `CHAINMERGE_RPC_URL_ETHEREUM`
+- `CHAINMERGE_RPC_URL_SOLANA`
+- `CHAINMERGE_RPC_URL_COSMOS`
+- `CHAINMERGE_RPC_URL_APTOS`
+- `CHAINMERGE_RPC_URL_SUI`
+- `CHAINMERGE_RPC_URL_POLKADOT`
+- `CHAINMERGE_RPC_URL_BITCOIN`
+- `CHAINMERGE_RPC_URL_STARKNET`
 
 ## Known Scope and Limits
 

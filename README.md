@@ -1,4 +1,4 @@
-# ChainCodec + ChainKit
+# ChainMerge + ChainKit
 
 Unified multichain decoding infrastructure focused on deterministic, chain-agnostic transaction normalization.
 
@@ -12,7 +12,7 @@ Quick docs:
 ## Core Idea
 
 Multichain apps should not rebuild parsing logic for every chain.  
-`ChainCodec` converts chain-specific transaction formats into one universal JSON schema.  
+`ChainMerge` converts chain-specific transaction formats into one universal JSON schema.  
 `ChainKit` adds reliability, indexing, and error standardization around that core.
 
 Input:
@@ -43,7 +43,7 @@ Output:
 
 ## Architecture
 
-### 1) Core Decode Layer (`core/chaincodec`)
+### 1) Core Decode Layer (`core/chainmerge`)
 - Language: Rust
 - Responsibility:
   - fetch/decode chain transaction data
@@ -71,7 +71,7 @@ Output:
 - Responsibility:
   - expose decode endpoints
   - validate inputs and return structured error envelopes
-  - call `chaincodec::decode_transaction` directly
+  - call `chainmerge::decode_transaction` directly
 - Core route:
   - `GET /api/health`
   - `GET /api/examples`
@@ -96,7 +96,7 @@ Output:
 ```txt
 .
 ├── core/
-│   └── chaincodec/
+│   └── chainmerge/
 │       └── src/
 │           ├── traits/
 │           ├── chains/
@@ -135,8 +135,8 @@ Output:
 
 ### Phase 0: Contracts First
 Goal: lock the canonical schema and interfaces.
-- Define universal transaction schema in `core/chaincodec/src/types`
-- Define decoder trait in `core/chaincodec/src/traits`
+- Define universal transaction schema in `core/chainmerge/src/types`
+- Define decoder trait in `core/chainmerge/src/traits`
 - Define error envelope for API responses
 
 Deliverable:
@@ -155,7 +155,7 @@ Deliverable:
 ### Phase 2: API Bridge
 Goal: make core decoder usable by apps.
 - Build Rust HTTP API in `services/api` using `axum`
-- Integrate API directly with `chaincodec` via local crate dependency
+- Integrate API directly with `chainmerge` via local crate dependency
 - Expose `GET /api/decode`
 - Input validation and timeout handling
 
@@ -279,6 +279,6 @@ GitHub Actions workflow:
 - `.github/workflows/ci.yml`
 
 Checks:
-- `cargo test` for `core/chaincodec`
+- `cargo test` for `core/chainmerge`
 - `cargo test` for `services/api`
 - `npm install && npm run build` for `apps/web`

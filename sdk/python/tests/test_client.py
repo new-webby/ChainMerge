@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 import unittest
 
-from chaincodec_sdk import (
-    ChainCodecAPIError,
-    ChainCodecClient,
-    ChainCodecTransportError,
+from chainmerge_sdk import (
+    ChainMergeAPIError,
+    ChainMergeClient,
+    ChainMergeTransportError,
 )
 
 
-class ChainCodecClientTests(unittest.TestCase):
+class ChainMergeClientTests(unittest.TestCase):
     def test_decode_tx_success(self) -> None:
         captured: dict[str, object] = {}
 
@@ -52,7 +52,7 @@ class ChainCodecClientTests(unittest.TestCase):
                 ),
             )
 
-        client = ChainCodecClient(
+        client = ChainMergeClient(
             base_url="http://127.0.0.1:8080/",
             api_key="secret",
             timeout=9.0,
@@ -95,9 +95,9 @@ class ChainCodecClientTests(unittest.TestCase):
                 ),
             )
 
-        client = ChainCodecClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
 
-        with self.assertRaises(ChainCodecAPIError) as raised:
+        with self.assertRaises(ChainMergeAPIError) as raised:
             client.decode_tx(chain="ethereum", tx_hash="bad")
 
         error = raised.exception
@@ -110,13 +110,13 @@ class ChainCodecClientTests(unittest.TestCase):
         def transport(url: str, headers: dict[str, str], timeout: float) -> tuple[int, str]:
             return 200, "not-json"
 
-        client = ChainCodecClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
 
-        with self.assertRaises(ChainCodecTransportError):
+        with self.assertRaises(ChainMergeTransportError):
             client.decode_tx(chain="ethereum", tx_hash="0xabc")
 
     def test_decode_tx_rejects_unsupported_chain(self) -> None:
-        client = ChainCodecClient(base_url="http://127.0.0.1:8080", transport=lambda *_: (200, "{}"))
+        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=lambda *_: (200, "{}"))
 
         with self.assertRaises(ValueError):
             client.decode_tx(chain="dogecoin", tx_hash="abc")
@@ -137,7 +137,7 @@ class ChainCodecClientTests(unittest.TestCase):
                 ),
             )
 
-        client = ChainCodecClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
         tx = client.decodeTx(chain="ethereum", hash="0xtest")
         self.assertEqual(tx.tx_hash, "0xtest")
 

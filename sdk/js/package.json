@@ -1,21 +1,21 @@
 {
-  "name": "chaincodec-sdk",
+  "name": "chainmerge-sdk",
   "version": "0.1.2",
-  "description": "TypeScript/JavaScript SDK for the ChainCodec multichain transaction decoder API.",
+  "description": "TypeScript/JavaScript SDK for the ChainMerge multichain transaction decoder API.",
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -28,7 +28,7 @@
     "multichain",
     "sdk",
     "transaction-decoder",
-    "chaincodec"
+    "chainmerge"
   ],
   "repository": {
     "type": "git",
@@ -38,13 +38,7 @@
     "url": "https://github.com/I-lost-everytime/Chaincodec/issues"
   },
   "homepage": "https://github.com/I-lost-everytime/Chaincodec#readme",
-  "peerDependencies": {
-    "typescript": ">=5.0.0"
-  },
   "devDependencies": {
     "typescript": "^5.6.3"
-  },
-  "dependencies": {
-    "chaincodec-sdk": "^0.1.2"
   }
 }

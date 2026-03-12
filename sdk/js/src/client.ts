@@ -1,10 +1,10 @@
 import type { Chain, DecodeErrorEnvelope, DecodeSuccessEnvelope, NormalizedTransaction } from "./types.js";
 
-export interface ChainCodecClientOptions {
+export interface ChainMergeClientOptions {
   /**
-   * Base URL of the ChainCodec API, e.g.:
+   * Base URL of the ChainMerge API, e.g.:
    * - "http://127.0.0.1:8080" for local development
-   * - "https://api.chaincodec.io" for a hosted deployment
+   * - "https://api.chainmerge.io" for a hosted deployment
    *
    * Do not include a trailing slash.
    */
@@ -22,14 +22,14 @@ export interface ChainCodecClientOptions {
   fetchImpl?: typeof fetch;
 }
 
-export class ChainCodecClient {
+export class ChainMergeClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: ChainCodecClientOptions) {
+  constructor(options: ChainMergeClientOptions) {
     if (!options.baseUrl) {
-      throw new Error("ChainCodecClient: baseUrl is required");
+      throw new Error("ChainMergeClient: baseUrl is required");
     }
 
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");

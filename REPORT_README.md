@@ -1,9 +1,9 @@
-# ChainCodec Progress Report
+# ChainMerge Progress Report
 
 ## Project Status (as of now)
 
 ### Phase 0: Contracts First (Completed)
-Implemented in `core/chaincodec`:
+Implemented in `core/chainmerge`:
 - Canonical chain enum (`Chain`) for supported networks
 - Universal transaction/event schema
 - Decode request validation (`rpc_url`, tx hash format checks)
@@ -11,12 +11,12 @@ Implemented in `core/chaincodec`:
 - Decoder dispatch via typed chain matching
 
 Key files:
-- `core/chaincodec/src/types/mod.rs`
-- `core/chaincodec/src/errors.rs`
-- `core/chaincodec/src/lib.rs`
+- `core/chainmerge/src/types/mod.rs`
+- `core/chainmerge/src/errors.rs`
+- `core/chainmerge/src/lib.rs`
 
 ### Phase 1: Solana MVP Decoder (Completed)
-Implemented in `core/chaincodec/src/chains/solana/mod.rs`:
+Implemented in `core/chainmerge/src/chains/solana/mod.rs`:
 - Solana RPC call using `getTransaction` with `jsonParsed`
 - Parses both outer instructions and inner instructions
 - Supports SPL token events:
@@ -37,7 +37,7 @@ Implemented in `services/api`:
   - `GET /api/index/{chain}/{hash}`
   - `GET /api/index/recent?limit=<n>`
 - Direct integration with core crate:
-  - `chaincodec::decode_transaction(...)`
+  - `chainmerge::decode_transaction(...)`
 - Structured error responses mapped to HTTP status codes
 - Request controls:
   - optional API key auth (`API_KEY` + `x-api-key`)
@@ -50,7 +50,7 @@ Key files:
 - `services/api/src/main.rs`
 
 ### Phase 3: Ethereum ERC-20 Decoder (Completed)
-Implemented in `core/chaincodec/src/chains/ethereum/mod.rs`:
+Implemented in `core/chainmerge/src/chains/ethereum/mod.rs`:
 - Ethereum RPC call via `eth_getTransactionReceipt`
 - Parses receipt logs for ERC-20 `Transfer` topic
 - Extracts token contract, from, to, and uint256 amount
@@ -93,7 +93,7 @@ Note:
 
 ## Test Coverage Added
 
-### Core (`core/chaincodec`)
+### Core (`core/chainmerge`)
 - Chain parsing tests
 - Request validation tests
 - Solana parser tests:
@@ -128,9 +128,9 @@ Note:
 
 ### Fixture-Based Decoder Tests
 - Ethereum fixture:
-  - `core/chaincodec/tests/fixtures/ethereum/erc20_receipt.json`
+  - `core/chainmerge/tests/fixtures/ethereum/erc20_receipt.json`
 - Cosmos fixture:
-  - `core/chaincodec/tests/fixtures/cosmos/msg_send_tx.json`
+  - `core/chainmerge/tests/fixtures/cosmos/msg_send_tx.json`
 - Purpose:
   - validate parser behavior without live network dependency
 
@@ -139,7 +139,7 @@ Note:
 ## 1) Run Core Tests
 
 ```bash
-cd /home/escanor/donda/core/chaincodec
+cd /home/escanor/donda/core/chainmerge
 cargo test
 ```
 
@@ -169,7 +169,7 @@ Default server:
 Optional env:
 - `HOST` (default `0.0.0.0`)
 - `PORT` (default `8080`)
-- `CHAINCODEC_RPC_URL` (used if `rpc_url` query is not provided)
+- `CHAINMERGE_RPC_URL` (used if `rpc_url` query is not provided)
 
 ## 4) Test Decode Endpoint (Ethereum success case)
 

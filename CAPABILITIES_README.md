@@ -1,8 +1,8 @@
-# ChainCodec One-Pager
+# ChainMerge One-Pager
 
-## What ChainCodec Is
+## What ChainMerge Is
 
-ChainCodec is a unified multichain transaction decoding platform.
+ChainMerge is a unified multichain transaction decoding platform.
 
 Input:
 - `chain`
@@ -14,7 +14,7 @@ Output:
 
 ## Why It Matters
 
-Multichain builders currently maintain separate parsers for each network. ChainCodec removes that duplication by standardizing decode output, so wallets, analytics platforms, and cross-chain apps can integrate once.
+Multichain builders currently maintain separate parsers for each network. ChainMerge removes that duplication by standardizing decode output, so wallets, analytics platforms, and cross-chain apps can integrate once.
 
 ## What Works Today
 
@@ -46,17 +46,17 @@ Multichain builders currently maintain separate parsers for each network. ChainC
 
 ## Architecture Snapshot
 
-- Core engine: Rust (`core/chaincodec`)
+- Core engine: Rust (`core/chainmerge`)
 - API: Rust + Axum (`services/api`)
 - Frontend demo: React + Vite (`apps/web`)
 - Indexing: SQLite-backed transaction index
 
 ## Compliance With Initial Vision
 
-### ChainCodec Lite / hackathon scope
+### ChainMerge Lite / hackathon scope
 - Status: `Complete`
 
-### Full ChainCodec + ChainKit in this repository scope
+### Full ChainMerge + ChainKit in this repository scope
 - Status: `Implemented end-to-end`
 - Includes:
   - unified decoder core
@@ -86,7 +86,7 @@ curl "http://127.0.0.1:8080/api/decode?chain=ethereum&hash=0xd5d0587189f3411699a
 
 ## Business-Ready Positioning
 
-ChainCodec can now be presented as:
+ChainMerge can now be presented as:
 - a production-capable multichain decoding API
 - a foundation layer for wallets, analytics, and cross-chain apps
 - a deployable system with test, CI, and containerized operations already in place

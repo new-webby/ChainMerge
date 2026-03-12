@@ -1,8 +1,8 @@
-# ChainCodec Usage Guide
+# ChainMerge Usage Guide
 
-This guide explains how to run ChainCodec and how to call it from UI or API.
+This guide explains how to run ChainMerge and how to call it from UI or API.
 
-## What ChainCodec Does
+## What ChainMerge Does
 
 Input:
 - `chain`
@@ -97,17 +97,17 @@ For dapps, wallets, or backend services, you can use the published npm package i
 ### Install
 
 ```bash
-npm install chaincodec-sdk
+npm install chainmerge-sdk
 # or
-yarn add chaincodec-sdk
+yarn add chainmerge-sdk
 ```
 
 ### Example (Node / browser)
 
 ```ts
-import { ChainCodecClient } from "chaincodec-sdk";
+import { ChainMergeClient } from "chainmerge-sdk";
 
-const client = new ChainCodecClient({
+const client = new ChainMergeClient({
   baseUrl: "http://127.0.0.1:8080", // or your hosted API URL
   // apiKey: "optional-x-api-key",
 });
@@ -133,15 +133,15 @@ For Python services, use the PyPI package:
 ### Install
 
 ```bash
-pip install chaincodec-sdk
+pip install chainmerge-sdk
 ```
 
 ### Example
 
 ```python
-from chaincodec_sdk import ChainCodecClient
+from chainmerge_sdk import ChainMergeClient
 
-client = ChainCodecClient(base_url="http://127.0.0.1:8080")
+client = ChainMergeClient(base_url="http://127.0.0.1:8080")
 
 tx = client.decode_tx(
     chain="polkadot",
@@ -155,15 +155,15 @@ print(tx.chain, tx.tx_hash, tx.value)
 
 - `HOST`: API bind host (default `0.0.0.0`)
 - `PORT`: API port (default `8080`)
-- `CHAINCODEC_RPC_URL`: optional global RPC URL override when query `rpc_url` is omitted
-- `CHAINCODEC_RPC_URL_ETHEREUM`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_SOLANA`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_COSMOS`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_APTOS`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_SUI`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_POLKADOT`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_BITCOIN`: optional chain-specific override
-- `CHAINCODEC_RPC_URL_STARKNET`: optional chain-specific override
+- `CHAINMERGE_RPC_URL`: optional global RPC URL override when query `rpc_url` is omitted
+- `CHAINMERGE_RPC_URL_ETHEREUM`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_SOLANA`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_COSMOS`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_APTOS`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_SUI`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_POLKADOT`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_BITCOIN`: optional chain-specific override
+- `CHAINMERGE_RPC_URL_STARKNET`: optional chain-specific override
 - `API_KEY`: if set, requests must send `x-api-key`
 - `RATE_LIMIT_PER_MIN`: request limit per minute per key/client
 - `INDEX_DB_PATH`: SQLite path for indexed decode storage

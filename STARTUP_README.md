@@ -56,15 +56,15 @@ npm run dev
 Common API env vars:
 - `HOST` (default `0.0.0.0`)
 - `PORT` (default `8080`)
-- `CHAINCODEC_RPC_URL` optional global RPC override when query `rpc_url` is missing
-- `CHAINCODEC_RPC_URL_ETHEREUM` optional chain-specific override
-- `CHAINCODEC_RPC_URL_SOLANA` optional chain-specific override
-- `CHAINCODEC_RPC_URL_COSMOS` optional chain-specific override
-- `CHAINCODEC_RPC_URL_APTOS` optional chain-specific override
-- `CHAINCODEC_RPC_URL_SUI` optional chain-specific override
-- `CHAINCODEC_RPC_URL_POLKADOT` optional chain-specific override
-- `CHAINCODEC_RPC_URL_BITCOIN` optional chain-specific override
-- `CHAINCODEC_RPC_URL_STARKNET` optional chain-specific override
+- `CHAINMERGE_RPC_URL` optional global RPC override when query `rpc_url` is missing
+- `CHAINMERGE_RPC_URL_ETHEREUM` optional chain-specific override
+- `CHAINMERGE_RPC_URL_SOLANA` optional chain-specific override
+- `CHAINMERGE_RPC_URL_COSMOS` optional chain-specific override
+- `CHAINMERGE_RPC_URL_APTOS` optional chain-specific override
+- `CHAINMERGE_RPC_URL_SUI` optional chain-specific override
+- `CHAINMERGE_RPC_URL_POLKADOT` optional chain-specific override
+- `CHAINMERGE_RPC_URL_BITCOIN` optional chain-specific override
+- `CHAINMERGE_RPC_URL_STARKNET` optional chain-specific override
 - `API_KEY` enables `x-api-key` requirement
 - `RATE_LIMIT_PER_MIN` request cap per minute
 - `INDEX_DB_PATH` SQLite index path

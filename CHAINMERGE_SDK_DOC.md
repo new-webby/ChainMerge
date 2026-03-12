@@ -1,6 +1,6 @@
-# ChainCodec SDK Doc (`chaincodec-sdk`)
+# ChainMerge SDK Doc (`chainmerge-sdk`)
 
-This document explains **end‑to‑end usage** of the ChainCodec JavaScript/TypeScript SDK:
+This document explains **end‑to‑end usage** of the ChainMerge JavaScript/TypeScript SDK:
 
 - What the SDK does
 - How to install and configure it
@@ -11,7 +11,7 @@ This document explains **end‑to‑end usage** of the ChainCodec JavaScript/Typ
 
 ### 1. What the SDK does
 
-The SDK wraps the ChainCodec HTTP API and gives you a typed client:
+The SDK wraps the ChainMerge HTTP API and gives you a typed client:
 
 - **Input**: `chain`, transaction `hash`, optional `rpcUrl`
 - **Output**: a **normalized transaction** object with a single JSON shape across chains.
@@ -29,9 +29,9 @@ You do **not** need to write custom decoders per chain. Your app just consumes o
 Install from npm:
 
 ```bash
-npm install chaincodec-sdk
+npm install chainmerge-sdk
 # or
-yarn add chaincodec-sdk
+yarn add chainmerge-sdk
 ```
 
 The package ships TypeScript types and works in:
@@ -43,7 +43,7 @@ The package ships TypeScript types and works in:
 
 ### 3. Core concepts and types
 
-The SDK mirrors the Rust types in `core/chaincodec` and the API response.
+The SDK mirrors the shared core types and API response schema.
 
 #### 3.1 Chain keys
 
@@ -84,31 +84,31 @@ interface NormalizedTransaction {
 The exact TypeScript definitions are exported from the package, so you can import them directly:
 
 ```ts
-import type { NormalizedTransaction, NormalizedEvent, Chain } from "chaincodec-sdk";
+import type { NormalizedTransaction, NormalizedEvent, Chain } from "chainmerge-sdk";
 ```
 
 ---
 
 ### 4. Creating a client
 
-The main entry is `ChainCodecClient`.
+The main entry is `ChainMergeClient`.
 
 ```ts
-import { ChainCodecClient } from "chaincodec-sdk";
+import { ChainMergeClient } from "chainmerge-sdk";
 
-const client = new ChainCodecClient({
+const client = new ChainMergeClient({
   baseUrl: "http://127.0.0.1:8080", // or your hosted API URL
-  apiKey: process.env.CHAINCODEC_API_KEY, // optional
+  apiKey: process.env.CHAINMERGE_API_KEY, // optional
 });
 ```
 
 #### 4.1 Constructor options
 
 - **`baseUrl`** (string, required)
-  - Base URL of your ChainCodec API.
+  - Base URL of your ChainMerge API.
   - Examples:
     - Local: `http://127.0.0.1:8080`
-    - Hosted: `https://api.yourdomain.com/chaincodec`
+    - Hosted: `https://api.yourdomain.com/chainmerge`
   - Do **not** include a trailing slash.
 
 - **`apiKey`** (string, optional)
@@ -121,9 +121,9 @@ const client = new ChainCodecClient({
 
     ```ts
     import fetch from "node-fetch";
-    import { ChainCodecClient } from "chaincodec-sdk";
+    import { ChainMergeClient } from "chainmerge-sdk";
 
-    const client = new ChainCodecClient({
+    const client = new ChainMergeClient({
       baseUrl: "http://127.0.0.1:8080",
       fetchImpl: fetch as unknown as typeof globalThis.fetch,
     });
@@ -156,10 +156,10 @@ const tx = await client.decodeTx({
 #### 5.3 Minimal Node example
 
 ```ts
-import { ChainCodecClient } from "chaincodec-sdk";
+import { ChainMergeClient } from "chainmerge-sdk";
 
 async function main() {
-  const client = new ChainCodecClient({
+  const client = new ChainMergeClient({
     baseUrl: "http://127.0.0.1:8080",
   });
 
@@ -194,9 +194,9 @@ You can use the SDK directly from browser apps, including React and similar fram
 
 ```ts
 import { useState } from "react";
-import { ChainCodecClient, type NormalizedTransaction } from "chaincodec-sdk";
+import { ChainMergeClient, type NormalizedTransaction } from "chainmerge-sdk";
 
-const client = new ChainCodecClient({
+const client = new ChainMergeClient({
   baseUrl: "http://127.0.0.1:8080",
 });
 
@@ -285,7 +285,7 @@ You can use `code` and `retryable` to map into application‑specific error mess
 The SDK itself is stateless; it just calls your API. Your **API** can be configured via:
 
 - `HOST`, `PORT`
-- `CHAINCODEC_RPC_URL` / `CHAINCODEC_RPC_URL_<CHAIN>`
+- `CHAINMERGE_RPC_URL` / `CHAINMERGE_RPC_URL_<CHAIN>`
 - `API_KEY` (enable required `x-api-key`)
 - `RATE_LIMIT_PER_MIN`
 - `INDEX_DB_PATH`
@@ -332,4 +332,3 @@ In browser apps, keep secrets out of the client:
   - The transaction was fetched and parsed, but it doesn’t match a transfer‑like pattern the current decoders understand.
 
 If you need examples tailored to a specific framework (Next.js, Express middleware, etc.), you can base them directly on the patterns in this document. 
-

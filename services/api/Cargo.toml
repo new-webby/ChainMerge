@@ -1,5 +1,5 @@
 [package]
-name = "chaincodec-api"
+name = "chainmerge-api"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,11 +8,12 @@ axum = "0.8"
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-chaincodec = { path = "../../core/chaincodec" }
+chainmerge = { path = "../../core/chainmerge" }
 tower-http = { version = "0.6", features = ["cors"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
+dotenvy = "0.15"
 
 [dev-dependencies]
 tower = "0.5"

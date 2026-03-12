@@ -1,8 +1,8 @@
-# ChainCodec Impact, Advancements, and DeepMind Roadmap
+# ChainMerge Impact, Advancements, and DeepMind Roadmap
 
 ## Is the Project Impactful?
 
-Yes. ChainCodec is impactful because it solves a hard, expensive bottleneck in multichain development: chain-specific data decoding.
+Yes. ChainMerge is impactful because it solves a hard, expensive bottleneck in multichain development: chain-specific data decoding.
 
 Current impact drivers:
 - One normalized schema across multiple ecosystems
@@ -72,7 +72,7 @@ Principle:
 ## Suggested DeepMind Integration Architecture
 
 Pipeline:
-1. `Decode` (existing ChainCodec)
+1. `Decode` (existing ChainMerge)
 2. `Normalize` (existing schema)
 3. `AI Enrich` (new DeepMind service)
 4. `Store + Serve` (index + API)

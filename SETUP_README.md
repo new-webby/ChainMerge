@@ -1,6 +1,6 @@
-# ChainCodec Setup (Non-Docker)
+# ChainMerge Setup (Non-Docker)
 
-This setup guide is for running ChainCodec on another local machine without Docker.
+This setup guide is for running ChainMerge on another local machine without Docker.
 
 ## 1) Prerequisites
 

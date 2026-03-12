@@ -1,23 +1,23 @@
-# chaincodec-sdk
+# chainmerge-sdk
 
-TypeScript/JavaScript SDK for the ChainCodec multichain transaction decoder API.
+TypeScript/JavaScript SDK for the ChainMerge multichain transaction decoder API.
 
-ChainCodec normalizes transactions from multiple chains (Ethereum, Solana, Cosmos, Aptos, Sui, Polkadot, Bitcoin, Starknet, etc.) into a single JSON shape. This SDK makes it easy for dapps, wallets, and backends to call the `/api/decode` endpoint and work with typed results.
+ChainMerge normalizes transactions from multiple chains (Ethereum, Solana, Cosmos, Aptos, Sui, Polkadot, Bitcoin, Starknet, etc.) into a single JSON shape. This SDK makes it easy for dapps, wallets, and backends to call the `/api/decode` endpoint and work with typed results.
 
 ## Installation
 
 ```bash
-npm install chaincodec-sdk
+npm install chainmerge-sdk
 # or
-yarn add chaincodec-sdk
+yarn add chainmerge-sdk
 ```
 
 ## Quick start
 
 ```ts
-import { ChainCodecClient } from "chaincodec-sdk";
+import { ChainMergeClient } from "chainmerge-sdk";
 
-const client = new ChainCodecClient({
+const client = new ChainMergeClient({
   baseUrl: "http://127.0.0.1:8080", // or your hosted URL
   // apiKey: "optional-api-key",
 });
@@ -46,9 +46,9 @@ main().catch((err) => {
 
 ## API
 
-### `new ChainCodecClient(options)`
+### `new ChainMergeClient(options)`
 
-- **`baseUrl`** (string, required): Base URL of the ChainCodec API (`http://127.0.0.1:8080`, `https://api.chaincodec.io`, etc.). No trailing slash.
+- **`baseUrl`** (string, required): Base URL of the ChainMerge API (`http://127.0.0.1:8080`, `https://api.chainmerge.io`, etc.). No trailing slash.
 - **`apiKey`** (string, optional): Sent as `x-api-key` header if provided.
 - **`fetchImpl`** (function, optional): Custom `fetch` implementation for environments where `fetch` is not global (e.g. Node.js < 18).
 
@@ -58,7 +58,7 @@ Decode a single transaction.
 
 - **`chain`**: One of `"solana" | "ethereum" | "cosmos" | "aptos" | "sui" | "polkadot" | "bitcoin" | "starknet"`.
 - **`hash`**: Transaction hash string.
-- **`rpcUrl`** (optional): Override RPC URL for this request; if omitted, ChainCodec's internal defaults and env config are used.
+- **`rpcUrl`** (optional): Override RPC URL for this request; if omitted, ChainMerge's internal defaults and env config are used.
 
 Returns a `Promise<NormalizedTransaction>`, where:
 
@@ -84,4 +84,3 @@ npm publish --access public
 ```
 
 Make sure you bump the `version` field in `package.json` before publishing a new release.
-
