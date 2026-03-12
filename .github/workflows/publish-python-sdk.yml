@@ -1,0 +1,86 @@
+name: Publish Python SDK
+
+on:
+  push:
+    tags:
+      - "python-sdk-v*"
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Target package index"
+        required: true
+        type: choice
+        options:
+          - testpypi
+          - pypi
+        default: testpypi
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate version matches tag
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+
+          TAG_VERSION="${GITHUB_REF_NAME#python-sdk-v}"
+          PYPROJECT_VERSION="$(python - <<'PY'
+          import tomllib
+          with open("sdk/python/pyproject.toml", "rb") as f:
+              data = tomllib.load(f)
+          print(data["project"]["version"])
+          PY
+          )"
+
+          if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match pyproject version ($PYPROJECT_VERSION)."
+            exit 1
+          fi
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build twine
+
+      - name: Build package
+        working-directory: sdk/python
+        run: python -m build
+
+      - name: Check distribution metadata
+        working-directory: sdk/python
+        run: python -m twine check dist/*
+
+      - name: Publish to PyPI (tag push)
+        if: github.event_name == 'push'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk/python/dist
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish to TestPyPI (manual)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.repository == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk/python/dist
+          repository-url: https://test.pypi.org/legacy/
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+      - name: Publish to PyPI (manual)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.repository == 'pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdk/python/dist
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

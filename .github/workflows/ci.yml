@@ -34,3 +34,15 @@ jobs:
       - name: Build web
         run: npm run build
         working-directory: apps/web
+
+  python-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test Python SDK
+        run: python -m unittest discover -s tests -v
+        working-directory: sdk/python

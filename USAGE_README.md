@@ -90,6 +90,67 @@ Recent indexed txs:
 curl "http://127.0.0.1:8080/api/index/recent?limit=20"
 ```
 
+## Use Through the JavaScript/TypeScript SDK
+
+For dapps, wallets, or backend services, you can use the published npm package instead of calling the HTTP API directly.
+
+### Install
+
+```bash
+npm install chaincodec-sdk
+# or
+yarn add chaincodec-sdk
+```
+
+### Example (Node / browser)
+
+```ts
+import { ChainCodecClient } from "chaincodec-sdk";
+
+const client = new ChainCodecClient({
+  baseUrl: "http://127.0.0.1:8080", // or your hosted API URL
+  // apiKey: "optional-x-api-key",
+});
+
+async function main() {
+  const tx = await client.decodeTx({
+    chain: "ethereum",
+    hash: "0xd5d0587189f3411699ae946baa2a7d3ebfaf13133f9014a22bab6948591611ad",
+  });
+
+  console.log("normalized tx:", tx);
+}
+
+main().catch((err) => {
+  console.error("decode failed:", err);
+});
+```
+
+## Use Through the Python SDK
+
+For Python services, use the PyPI package:
+
+### Install
+
+```bash
+pip install chaincodec-sdk
+```
+
+### Example
+
+```python
+from chaincodec_sdk import ChainCodecClient
+
+client = ChainCodecClient(base_url="http://127.0.0.1:8080")
+
+tx = client.decode_tx(
+    chain="polkadot",
+    tx_hash="0x65498725d9a093b63f9f312e5271926c8ac5e1493cba18428effd58dae2d2a6f",
+)
+
+print(tx.chain, tx.tx_hash, tx.value)
+```
+
 ## Runtime Environment Variables
 
 - `HOST`: API bind host (default `0.0.0.0`)
@@ -126,7 +187,7 @@ curl "http://127.0.0.1:8080/api/index/recent?limit=20"
 3. Return multiple decoded events per transaction instead of first matched transfer only.
 4. Add richer chain-specific fixtures and live integration tests in CI.
 5. Add response caching for repeated hash lookups and configurable cache TTL.
-6. Add OpenAPI spec and typed SDK clients (TypeScript, Rust, Python).
+6. Add OpenAPI spec and typed SDK clients (Rust, Go).
 7. Add background indexer mode (scan by block/checkpoint, not only request-time indexing).
 8. Add observability improvements (structured metrics labels, tracing spans, error dashboards).
 9. Add configurable per-chain timeouts and retry policies.

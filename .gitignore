@@ -24,6 +24,14 @@ yarn-error.log*
 **/node_modules/
 **/dist/
 
+# Python build/test artifacts
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.egg-info/
+**/.venv/
+**/build/
+
 # Local runtime DB/cache artifacts
 services/api/data/*.db
 services/api/data/*.db-*
