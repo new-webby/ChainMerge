@@ -30,6 +30,7 @@ yarn-error.log*
 **/*.pyo
 **/*.egg-info/
 **/.venv/
+**/*venv*/
 **/build/
 
 # Local runtime DB/cache artifacts

@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from .errors import ChainMergeAPIError, ChainMergeTransportError
-from .types import NormalizedTransaction, SUPPORTED_CHAINS
+from .types import ExampleTx, HealthResponse, NormalizedTransaction, SUPPORTED_CHAINS
 
 Transport = Callable[[str, Mapping[str, str], float], tuple[int, str]]
 
@@ -50,6 +50,31 @@ class ChainMergeClient:
     def base_url(self) -> str:
         return self._base_url
 
+    def health(self) -> HealthResponse:
+        """Check API health."""
+        status_code, body = self._call_api("/api/health")
+        payload = _load_json(body)
+        if status_code >= 400:
+            raise _api_error_from_response(status_code, payload, body)
+        return HealthResponse.from_dict(payload)
+
+    def examples(self) -> list[ExampleTx]:
+        """Get example transactions supported by the API."""
+        status_code, body = self._call_api("/api/examples")
+        payload = _load_json(body)
+        if status_code >= 400:
+            raise _api_error_from_response(status_code, payload, body)
+        raw_examples = payload.get("examples", [])
+        return [ExampleTx.from_dict(item) for item in raw_examples]
+
+    def get_metrics(self) -> str:
+        """Get internal API metrics (Prometheus format string)."""
+        status_code, body = self._call_api("/api/metrics")
+        if status_code >= 400:
+            payload = _load_json(body)
+            raise _api_error_from_response(status_code, payload, body)
+        return body
+
     def decode_tx(
         self,
         *,
@@ -57,6 +82,65 @@ class ChainMergeClient:
         tx_hash: str,
         rpc_url: str | None = None,
     ) -> NormalizedTransaction:
+        params = self._build_params(chain, tx_hash, rpc_url)
+        url = f"{self._base_url}/api/decode?{urlencode(params)}"
+        return self._decode_at_url(url)
+
+    def decode_and_index_tx(
+        self,
+        *,
+        chain: str,
+        tx_hash: str,
+        rpc_url: str | None = None,
+    ) -> NormalizedTransaction:
+        """Decode a transaction and persist it in the backend index."""
+        params = self._build_params(chain, tx_hash, rpc_url)
+        url = f"{self._base_url}/api/index/decode?{urlencode(params)}"
+        return self._decode_at_url(url)
+
+    def lookup_indexed_tx(
+        self,
+        *,
+        chain: str,
+        tx_hash: str,
+    ) -> NormalizedTransaction:
+        """Lookup a previously decoded transaction from the backend index."""
+        url = f"{self._base_url}/api/index/{chain}/{tx_hash}"
+        return self._decode_at_url(url)
+
+    def list_recent_indexed_txs(self, limit: int = 20) -> list[NormalizedTransaction]:
+        """List recent transactions decoded and indexed by the API."""
+        url = f"{self._base_url}/api/index/recent?limit={limit}"
+        status_code, body = self._call_api_full_url(url)
+        payload = _load_json(body)
+
+        if status_code >= 400:
+            raise _api_error_from_response(status_code, payload, body)
+
+        raw_items = payload.get("items", [])
+        return [NormalizedTransaction.from_dict(item) for item in raw_items]
+
+    def decodeTx(
+        self,
+        *,
+        chain: str,
+        hash: str,
+        rpcUrl: str | None = None,
+    ) -> NormalizedTransaction:
+        """JavaScript-style alias for decode_tx."""
+        return self.decode_tx(chain=chain, tx_hash=hash, rpc_url=rpcUrl)
+
+    def _call_api(self, path: str) -> tuple[int, str]:
+        url = f"{self._base_url}{path}"
+        return self._call_api_full_url(url)
+
+    def _call_api_full_url(self, url: str) -> tuple[int, str]:
+        headers: dict[str, str] = {"accept": "application/json"}
+        if self._api_key:
+            headers["x-api-key"] = self._api_key
+        return self._transport(url, headers, self._timeout)
+
+    def _build_params(self, chain: str, tx_hash: str, rpc_url: str | None) -> dict[str, str]:
         chain_key = chain.strip().lower()
         if chain_key not in SUPPORTED_CHAINS:
             supported = ", ".join(SUPPORTED_CHAINS)
@@ -72,27 +156,22 @@ class ChainMergeClient:
         }
         if rpc_url and rpc_url.strip():
             params["rpc_url"] = rpc_url.strip()
+        return params
 
-        url = f"{self._base_url}/api/decode?{urlencode(params)}"
-        headers: dict[str, str] = {"accept": "application/json"}
-        if self._api_key:
-            headers["x-api-key"] = self._api_key
-
-        status_code, body = self._transport(url, headers, self._timeout)
+    def _decode_at_url(self, url: str) -> NormalizedTransaction:
+        status_code, body = self._call_api_full_url(url)
         payload = _load_json(body)
 
         if status_code >= 400:
             raise _api_error_from_response(status_code, payload, body)
 
-        if not isinstance(payload, dict):
-            raise ChainMergeTransportError(
-                "unexpected response format from ChainMerge API",
-                status_code=status_code,
-                raw=payload,
-            )
-
         decoded = payload.get("decoded")
         if not isinstance(decoded, dict):
+            # Fallback for index lookup which might return NormalizedTransaction directly
+            # check the payload shape
+            if isinstance(payload, dict) and "chain" in payload and "tx_hash" in payload:
+                return NormalizedTransaction.from_dict(payload)
+
             raise ChainMergeTransportError(
                 "unexpected response payload: missing decoded object",
                 status_code=status_code,
@@ -100,16 +179,6 @@ class ChainMergeClient:
             )
 
         return NormalizedTransaction.from_dict(decoded)
-
-    def decodeTx(
-        self,
-        *,
-        chain: str,
-        hash: str,
-        rpcUrl: str | None = None,
-    ) -> NormalizedTransaction:
-        """JavaScript-style alias for decode_tx."""
-        return self.decode_tx(chain=chain, tx_hash=hash, rpc_url=rpcUrl)
 
 
 def _load_json(body: str) -> Any:

@@ -144,6 +144,14 @@ tx = client.decode_tx(
     tx_hash: str,
     rpc_url: str | None = None,
 )
+
+# New 1.1.0 Methods:
+client.health() -> HealthResponse
+client.examples() -> ExamplesResponse
+client.get_metrics() -> dict
+client.decode_and_index_tx(chain, tx_hash, rpc_url=None) -> NormalizedTransaction
+client.lookup_indexed_tx(chain, tx_hash) -> NormalizedTransaction
+client.list_recent_indexed_txs(limit=10) -> list[NormalizedTransaction]
 ```
 
 JavaScript-style alias is also available:
