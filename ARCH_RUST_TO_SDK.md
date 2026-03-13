@@ -1,139 +1,126 @@
-This guide explains the architectural pipeline of ChainMerge: how we transform raw blockchain data using a high-performance **Rust Core** into developer-friendly **TypeScript** and **Python** SDKs.
+# ChainMerge Architecture: Rust-to-SDK Pipeline
 
-## 0. Foundations: What is an SDK?
+This document provides a comprehensive technical specification of how ChainMerge decodes, normalizes, and delivers multichain transaction data. It covers everything from the low-level **Rust Core** to the high-level **SDK** interfaces.
 
-An **SDK (Software Development Kit)** is a set of tools, libraries, and documentation that allows developers to build applications for a specific platform or service. 
+## 1. Architectural Foundations
 
-In the context of ChainMerge, our SDKs are **"Wrapper Libraries."** Their job is to:
-1.  **Abstract the Network**: Handles HTTP requests, retries, and timeouts so the user doesn't have to `fetch()` or `curl` manually.
-2.  **Enforce Type Safety**: Maps loose JSON blobs into strict, language-native objects (TypeScript Interfaces or Python Dataclasses).
-3.  **Provide Discoverability**: Offers IDE autocompletion (IntelliSense) for parameters and return values.
+ChainMerge is built as a **Single Source of Truth** system. All decoding logic lives in Rust, ensuring that every SDK (TypeScript, Python, Go, etc.) returns identical results for the same transaction.
 
-### The Philosophy: Rust-Powered, Language-Native
-We write the "heavy" logic (decoding complex binary blockchain data) once in Rust. We then expose it via a standard JSON API. The SDKs then "wrap" this API, giving developer the power of Rust with the ease of the language they love.
-
----
-
-## 1. Bootstrapping a New SDK (Start-to-Finish)
-
-How do we create a new SDK (e.g., for Go or Ruby) from scratch based on the Rust core?
-
-### Step A: Initialize the Project
-Create the basic package structure in the `sdk/` directory.
-- **Node/TS**: `npm init`, `tsconfig.json`.
-- **Python**: `pyproject.toml`, `src/`.
-- **Go**: `go mod init`.
-
-### Step B: Define the "Wire Protocol"
-Analyze the JSON output of the Rust API (`services/api`). Since the Rust core uses `serde` for serialization, we look at the Rust struct definitions to build equivalent types in the new language.
-
-### Step C: Build the HTTP Transport
-Implement a `Client` class that:
-- Accepts a `baseUrl` and optional `apiKey`.
-- Uses a standard HTTP library (e.g., `axios` for JS, `requests` for Python).
-- Implements a generic `call(method, path, options)` method to handle headers and error parsing.
-
-### Step D: Implement Feature Methods
-Map API endpoints to native functions.
-- `GET /api/decode?chain=eth&hash=...` becomes `client.decode_tx("eth", "...")`.
-
----
-
-## 2. The 3-Tier Architecture
-
-ChainMerge follows a strict 3-tier model to ensure performance, type safety, and ease of use.
+### The 3-Tier Execution Flow
 
 ```mermaid
-graph TD
-    A[Rust Core] -- "Shared Logic & Types" --> B[Axum API]
-    B -- "JSON over HTTP" --> C[TypeScript SDK]
-    B -- "JSON over HTTP" --> D[Python SDK]
-    C --> E[dApps / Frontends]
-    D --> F[Backends / Data Scripts]
+graph LR
+    subgraph "External World"
+        RPC[Public/Private RPC]
+    end
+    
+    subgraph "ChainMerge Server (Rust)"
+        Core[[Rust Core: Decoders]]
+        API[[Axum API: Endpoints]]
+        DB[(SQLite Index)]
+    end
+    
+    subgraph "Client Side"
+        SDK[JS/Python/Native SDK]
+        User[Developer Code]
+    end
+    
+    RPC <--> Core
+    Core <--> API
+    API <--> DB
+    API <--> SDK
+    SDK --> User
 ```
-
-### Tier 1: Rust Core (`core/chainmerge`)
-The **Source of Truth**. It contains the low-level decoding logic for every supported chain.
-- **Responsibility**: Fetching raw data (via RPC), validating hash formats, and normalizing into a standard schema.
-- **Key Files**: `types/mod.rs` (Schema), `normalizer/mod.rs` (Logic).
-
-### Tier 2: API Service (`services/api`)
-The **Bridge**. A thin wrapper around the core using the `Axum` framework.
-- **Responsibility**: Exposing the Rust functions as HTTP endpoints, handling authentication (`x-api-key`), rate limiting, and persistence (SQLite indexing).
-- **Key Files**: `main.rs` (Routes & Handlers).
-
-### Tier 3: SDKs (`sdk/js` & `sdk/python`)
-The **Frontend**. Language-native libraries that consume the API.
-- **Responsibility**: Providing a typed, idiomatic interface for developers so they don't have to handle raw HTTP requests or JSON parsing manually.
 
 ---
 
-## 2. The Conversion Process
+## 2. Inbound Data Specification (What the SDK Takes)
 
-Converting a core Rust feature to an SDK feature involves four steps:
+When a developer calls `client.decodeTx()`, the following data flows into the system:
 
-### Step 1: Define the Type in Rust
-We define a new event or action in `core/chainmerge/src/types/mod.rs` using `serde`.
-```rust
-#[derive(Serialize, Deserialize)]
-pub struct NormalizedTransaction {
-    pub chain: Chain,
-    pub tx_hash: String,
-    pub sender: Option<String>,
-    // ...
-}
-```
+### A. Authentication & Headers
+- **`x-api-key`**: (Optional) String used for rate-limiting and access control.
+- **`accept`**: Expected to be `application/json`.
 
-### Step 2: Expose via Axum
-The API handler calls the core logic and returns the serialized JSON.
-```rust
-async fn decode_handler(query: Query<DecodeQuery>) -> Json<DecodeHttpResponse> {
-    let decoded = chainmerge::decode_transaction(&request)?;
-    Json(DecodeHttpResponse { decoded })
-}
-```
-
-### Step 3: Mirror Types in SDK
-We manually mirror the Rust types into the SDK's native type system.
-- **TypeScript**: Interfaces in `types.ts`.
-- **Python**: `@dataclass` objects in `types.py`.
-
-### Step 4: Implement Client Method
-The SDK `Client` class is updated to call the new API endpoint and cast the result into the mirrored type.
-
----
-
-## 3. Data Type Mapping
-
-| Field | Rust (Core) | TypeScript (JS SDK) | Python (SDK) |
+### B. Request Parameters (Query String)
+| Parameter | Type | Validation Rules | Description |
 |:--- |:--- |:--- |:--- |
-| **Chain ID** | `enum Chain` | `type Chain` (Union) | `Literal` / `str` |
-| **TX Hash** | `String` | `string` | `str` |
-| **Optional Address**| `Option<String>` | `string \| undefined` | `str \| None` |
-| **Array of Events** | `Vec<NormalizedEvent>`| `NormalizedEvent[]` | `list[NormalizedEvent]` |
-| **Metadata** | `serde_json::Value` | `unknown` | `Any` |
+| `chain` | `String` | Must match supported list (enum). | The target blockchain (e.g., `solana`, `ethereum`). |
+| `hash` | `String` | Length and format check per chain. | The unique transaction identifier. |
+| `rpc_url` | `String` | Optional. Must be valid URL. | Overrides the default backend RPC node. |
+
+### C. Validation Logic (Rust Layer)
+Before any network call, the Rust Core validates the `hash` format:
+- **Ethereum/Starknet**: Starts with `0x`, 66 chars (hex).
+- **Bitcoin**: 64 chars (hex).
+- **Solana/Sui/Aptos**: Base58/Base64 strings (32–128 chars).
 
 ---
 
-## 4. Function & Output Reference
+## 3. The Core Processing Pipeline
 
-The primary goal of every SDK is the `decode` function.
+Once the data is validated, the Rust Core performs the following steps:
 
-### Input Parameters
-- **`chain`**: `ethereum`, `solana`, `cosmos`, `aptos`, `sui`, `polkadot`, `bitcoin`, `starknet`.
-- **`hash`**: The transaction identifier (hex or base58).
-- **`rpcUrl`** (optional): Override for the backend's default node.
-
-### Output Schema (`NormalizedTransaction`)
-Regardless of the language, the output always follows this normalized shape:
-
-1.  **Header Data**: `chain`, `tx_hash`, `sender`, `receiver`, `value`.
-2.  **Events**: Raw, granular log-level data (e.g., specific smart contract events).
-3.  **Actions**: High-level intent (e.g., "This was a **Swap** of 100 USDC for 1 SOL").
+1.  **RPC Fetching**: Connects to the chain provider using the selected `rpc_url`. It handles retry logic for transient network failures.
+2.  **Raw Decoding**: Parses the binary response (ABIs for EVM, Borsh for Solana, BCS for Sui/Aptos).
+3.  **Normalization**: Maps chain-specific logs into the **Universal Event Model**.
+4.  **Semantic Lifting**: Aggregates multiple events into a single "Action." 
+    - *Example*: An EVM "Approval" + "Transfer" + "Burn" is lifted into a single **Swap** action.
+5.  **Persistence**: The result is serialized to JSON and stored in the SQLite Index for instant future retrieval.
 
 ---
 
-## 5. Why this architecture?
-1.  **Consistency**: A bug fix in the Rust core automatically applies to all SDKs once the API is updated.
-2.  **Speed**: Rust handles the heavy lifting of parsing binary blockchain data.
-3.  **Cross-Platform**: By using a JSON API bridge, we can support any language (Go, Ruby, Java) by simply mirroring the JSON schema.
+## 4. Outbound Data Specification (What the SDK Returns)
+
+The SDK returns a `NormalizedTransaction` object. This object is the result of converting the Rust `struct` into JSON, and then into a language-native class/interface.
+
+### A. Header Metadata
+- `chain`: The origin blockchain.
+- `tx_hash`: Canonical transaction identifier.
+- `sender`/`receiver`: Top-level addresses derived from the main transaction intent.
+- `value`: Native currency amount (e.g., ETH, SOL) in human-readable decimal string.
+
+### B. Events (Granular)
+ Granular, log-level triggers.
+- `event_type`: `token_transfer`, `nft_mint`, `contract_interaction`, etc.
+- `token`: Contract address or mint ID.
+- `from`/`to`: Transfer parties.
+- `amount`: Raw value moved.
+
+### C. Actions (High-Level Intent)
+The most valuable part of the SDK for developers. It tells you **what happened** without requiring blockchain expertise.
+- `action_type`: `transfer`, `swap`, `stake`, `bridge`, `unknown`.
+- `metadata`: A flexible JSON blob containing action-specific context (e.g., swap routes, pool IDs).
+
+---
+
+## 5. Error Data Model
+
+ChainMerge uses a canonical error format so SDKs can handle failures predictably.
+
+| Rust `ErrorCode` | SDK Exception | HTTP Status | Description |
+|:--- |:--- |:--- |:--- |
+| `unsupported_chain` | `UnsupportedChainError` | 400 | Chain is not supported by this version. |
+| `invalid_request` | `ValidationError` | 400 | Missing or malformed parameters. |
+| `invalid_hash` | `InvalidHashError` | 422 | Hash length or format is incorrect. |
+| `rpc` | `ChainTransportError` | 502 | Target blockchain RPC is down or timed out. |
+| `internal` | `InternalServerError` | 500 | Unexpected error in decoding logic. |
+
+---
+
+## 6. Cross-Language Mapping Reference
+
+| Concept | Rust Struct | TypeScript Interface | Python Dataclass |
+|:--- |:--- |:--- |:--- |
+| **Transaction** | `NormalizedTransaction` | `NormalizedTransaction` | `NormalizedTransaction` |
+| **Event** | `NormalizedEvent` | `NormalizedEvent` | `NormalizedEvent` |
+| **Action** | `Action` | `Action` | `Action` |
+| **Error** | `ErrorEnvelope` | `ErrorEnvelope` | `ChainMergeAPIError` |
+
+---
+
+## 7. Performance & Optimization Tips
+
+- **Use the Index**: Calling `client.lookupIndexedTx()` is 100x faster than `decodeTx()` because it skips the network call to the blockchain RPC.
+- **Batching**: While the API is 1:1, use the SDK effectively by calling multiple `decodeTx()` promises in parallel (`Promise.all` in JS, `asyncio.gather` in Python).
+- **Custom RPCs**: For high-traffic apps, always provide your own `rpc_url` to bypass public rate limits.
