@@ -1,0 +1,369 @@
+/* ── ChainMerge Extension Panel Styles ──────────────────────── */
+/* All classes prefixed with .cm- to avoid collisions */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.cm-panel {
+  position: fixed;
+  top: 80px;
+  right: -420px;
+  width: 400px;
+  max-height: calc(100vh - 120px);
+  z-index: 2147483647;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e8edf8;
+  background: rgba(8, 12, 20, 0.92);
+  border: 1px solid rgba(79, 142, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(79,142,255,0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cm-panel.cm-open {
+  right: 16px;
+}
+
+/* ── Toggle Tab ── */
+.cm-toggle {
+  position: fixed;
+  top: 120px;
+  right: 0;
+  z-index: 2147483646;
+  background: linear-gradient(135deg, #4f8eff, #7c5cfc);
+  border: none;
+  border-radius: 10px 0 0 10px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: -2px 4px 16px rgba(79,142,255,0.4);
+  transition: padding 0.2s;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.cm-toggle:hover { padding: 10px 9px; }
+.cm-toggle-icon { font-size: 16px; writing-mode: horizontal-tb; }
+
+/* ── Panel Header ── */
+.cm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(79, 142, 255, 0.12);
+  background: linear-gradient(135deg, rgba(79,142,255,0.1), rgba(124,92,252,0.08));
+  flex-shrink: 0;
+}
+
+.cm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cm-logo-text {
+  font-weight: 700;
+  font-size: 13px;
+  background: linear-gradient(135deg, #fff, #8ab4f8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cm-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cm-close-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: #8a97b0;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 7px;
+  line-height: 1.4;
+  transition: background 0.2s, color 0.2s;
+}
+.cm-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+/* ── Body ── */
+.cm-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 14px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79,142,255,0.2) transparent;
+}
+.cm-body::-webkit-scrollbar { width: 4px; }
+.cm-body::-webkit-scrollbar-thumb { background: rgba(79,142,255,0.25); border-radius: 4px; }
+
+/* ── Loading State ── */
+.cm-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: #8a97b0;
+  font-size: 12px;
+}
+
+.cm-spinner {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(79,142,255,0.2);
+  border-top-color: #4f8eff;
+  border-radius: 50%;
+  animation: cm-spin 0.75s linear infinite;
+}
+
+@keyframes cm-spin { to { transform: rotate(360deg); } }
+
+/* ── Chain Badge ── */
+.cm-chain-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cm-chain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(79,142,255,0.12);
+  border: 1px solid rgba(79,142,255,0.25);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7ab3ff;
+  text-transform: capitalize;
+}
+
+.cm-hash {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #8a97b0;
+  word-break: break-all;
+}
+
+/* ── Card ── */
+.cm-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 11px 13px;
+  margin-bottom: 10px;
+}
+
+.cm-card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a97b0;
+  margin-bottom: 8px;
+}
+
+.cm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+.cm-row:last-child { margin-bottom: 0; }
+
+.cm-label {
+  color: #8a97b0;
+  flex-shrink: 0;
+  min-width: 60px;
+}
+
+.cm-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #d0d8ee;
+  text-align: right;
+  word-break: break-all;
+}
+
+.cm-value.cm-highlight {
+  color: #22d3a0;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+/* ── Event Badge ── */
+.cm-event-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cm-event-token_transfer { background: rgba(34,211,160,0.12); border: 1px solid rgba(34,211,160,0.25); color: #22d3a0; }
+.cm-event-swap           { background: rgba(79,142,255,0.12); border: 1px solid rgba(79,142,255,0.25); color: #4f8eff; }
+.cm-event-unsupported    { background: rgba(138,151,176,0.12); border: 1px solid rgba(138,151,176,0.2); color: #8a97b0; }
+
+/* ── Alert Banners ── */
+.cm-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 8px 11px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.cm-alert-whale {
+  background: rgba(79,142,255,0.1);
+  border: 1px solid rgba(79,142,255,0.25);
+  color: #7ab3ff;
+}
+.cm-alert-risk {
+  background: rgba(240,91,110,0.1);
+  border: 1px solid rgba(240,91,110,0.25);
+  color: #f05b6e;
+}
+
+/* ── AI Explanation ── */
+.cm-ai-section {}
+
+.cm-ai-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a97b0;
+  margin-bottom: 8px;
+}
+
+.cm-ai-badge {
+  background: linear-gradient(135deg, rgba(79,142,255,0.25), rgba(124,92,252,0.2));
+  border: 1px solid rgba(124,92,252,0.3);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #c0a8ff;
+  letter-spacing: 0.08em;
+}
+
+.cm-ai-text {
+  background: rgba(124,92,252,0.06);
+  border: 1px solid rgba(124,92,252,0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #c8d4f0;
+}
+
+.cm-ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8a97b0;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* ── Raw JSON Toggle ── */
+.cm-raw-toggle {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 7px;
+  color: #8a97b0;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 10px;
+  padding: 7px;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+.cm-raw-toggle:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+.cm-raw-json {
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(79,142,255,0.12);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #abb2bf;
+  overflow: auto;
+  max-height: 200px;
+  white-space: pre;
+  display: none;
+}
+.cm-raw-json.cm-visible { display: block; }
+
+/* ── Error State ── */
+.cm-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  text-align: center;
+}
+.cm-error-icon { font-size: 28px; }
+.cm-error-msg { color: #f05b6e; font-size: 12px; line-height: 1.5; }
+.cm-error-sub { color: #8a97b0; font-size: 11px; }
+
+/* ── Footer ── */
+.cm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.cm-footer-brand {
+  font-size: 10px;
+  color: #8a97b0;
+  font-weight: 500;
+}
+
+.cm-footer-link {
+  font-size: 10px;
+  color: #4f8eff;
+  text-decoration: none;
+  cursor: pointer;
+}
+.cm-footer-link:hover { text-decoration: underline; }

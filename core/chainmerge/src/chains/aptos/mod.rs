@@ -17,19 +17,33 @@ impl ChainDecoder for AptosDecoder {
     fn decode(&self, request: &DecodeRequest) -> Result<NormalizedTransaction, DecodeError> {
         let tx = fetch_transaction(&request.rpc_url, &request.tx_hash)?;
         let events = extract_transfer_events(&tx);
+        let tx_sender = tx.get("sender").and_then(Value::as_str).map(ToString::to_string);
 
-        if events.is_empty() {
-            return Err(DecodeError::UnsupportedEvent);
-        }
+        let (final_events, sender, receiver, value) = if events.is_empty() {
+            let unsupported_event = NormalizedEvent {
+                event_type: EventType::Unsupported,
+                token: None,
+                from: tx_sender.clone(),
+                to: None,
+                amount: None,
+                raw_program: Some("aptos_generic_tx".to_string()),
+            };
+            (vec![unsupported_event], tx_sender, None, None)
+        } else {
+            let s = events.first().and_then(|e| e.from.clone());
+            let r = events.first().and_then(|e| e.to.clone());
+            let v = events.first().and_then(|e| e.amount.clone());
+            (events, s, r, v)
+        };
 
-        let sender = events.first().and_then(|e| e.from.clone());
-        let receiver = events.first().and_then(|e| e.to.clone());
-        let value = events.first().and_then(|e| e.amount.clone());
-
-        let actions = events
+        let actions = final_events
             .iter()
             .map(|e| Action {
-                action_type: ActionType::Transfer,
+                action_type: if matches!(e.event_type, EventType::Unsupported) {
+                    ActionType::Unknown
+                } else {
+                    ActionType::Transfer
+                },
                 from: e.from.clone(),
                 to: e.to.clone(),
                 amount: e.amount.clone(),
@@ -44,14 +58,14 @@ impl ChainDecoder for AptosDecoder {
             sender,
             receiver,
             value,
-            events,
+            events: final_events,
             actions,
         })
     }
 }
 
 fn fetch_transaction(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError> {
-    let body = get_json_with_failover(rpc_url, &format!("/v1/transactions/by_hash/{tx_hash}"))?;
+    let body = get_json_with_failover(rpc_url, &format!("/v1/transactions/by_hash/{tx_hash}"), None)?;
 
     if let Some(message) = body.get("message").and_then(Value::as_str) {
         return Err(DecodeError::Rpc(format!("aptos api returned error: {message}")));

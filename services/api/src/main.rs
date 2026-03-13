@@ -440,14 +440,14 @@ fn resolve_rpc_url(chain: Chain, request_rpc_url: Option<String>) -> Result<Stri
     }
 
     let default_url = match chain {
-        Chain::Ethereum => "https://ethereum-rpc.publicnode.com",
-        Chain::Solana => "https://api.mainnet-beta.solana.com",
+        Chain::Ethereum => "https://ethereum-rpc.publicnode.com,https://eth-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
+        Chain::Solana => "https://api.mainnet-beta.solana.com,https://solana-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
         Chain::Cosmos => "https://rest.cosmos.directory/cosmoshub",
-        Chain::Aptos => "https://api.mainnet.aptoslabs.com/v1",
-        Chain::Sui => "https://fullnode.mainnet.sui.io:443",
+        Chain::Aptos => "https://api.mainnet.aptoslabs.com/v1,https://aptos-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
+        Chain::Sui => "https://fullnode.mainnet.sui.io:443,https://sui-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
         Chain::Polkadot => "https://polkadot.api.subscan.io",
-        Chain::Bitcoin => "https://blockstream.info/api",
-        Chain::Starknet => "https://rpc.starknet.lava.build",
+        Chain::Bitcoin => "https://blockstream.info/api,https://bitcoin-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
+        Chain::Starknet => "https://rpc.starknet.lava.build,https://starknet-mainnet.g.alchemy.com/v2/6Wc9vExpYDvd9UD6D3Bfq",
     };
 
     Ok(default_url.to_string())

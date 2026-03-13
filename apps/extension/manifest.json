@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "ChainMerge · TX Decoder",
+  "version": "1.0.0",
+  "description": "Automatically decodes blockchain transactions on block explorers using ChainMerge and Gemini AI.",
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chainmerge-decoder@chainmerge.io",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": [
+    "*://*/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.etherscan.io/tx/*",
+        "*://*.bscscan.com/tx/*",
+        "*://*.polygonscan.com/tx/*",
+        "*://*.arbiscan.io/tx/*",
+        "*://*.optimistic.etherscan.io/tx/*",
+        "*://*.solscan.io/tx/*",
+        "*://solana.fm/tx/*",
+        "*://*.starkscan.co/tx/*",
+        "*://*.mintscan.io/*/txs/*",
+        "*://*.aptoscan.com/tx/*",
+        "*://*.suiscan.xyz/tx/*",
+        "*://*.blockchain.com/btc/tx/*",
+        "*://blockstream.info/tx/*",
+        "*://*.subscan.io/extrinsic/*",
+        "*://*.polkascan.io/*/transaction/*"
+      ],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

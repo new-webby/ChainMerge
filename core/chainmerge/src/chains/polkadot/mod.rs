@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use serde_json::{json, Value};
+use crate::chainrpc::post_json_with_failover;
 use crate::errors::DecodeError;
 use crate::traits::ChainDecoder;
 use crate::types::{
@@ -55,30 +57,19 @@ impl ChainDecoder for PolkadotDecoder {
 fn fetch_extrinsic_details(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError> {
     // Supports Subscan-style endpoint base, e.g. https://polkadot.api.subscan.io
     let payload = json!({ "hash": tx_hash });
-    let endpoint = format!("{}/api/scan/extrinsic", rpc_url.trim_end_matches('/'));
-    let mut request = ureq::post(&endpoint).set("Content-Type", "application/json");
+    let rpc_url = format!("{}/api/scan/extrinsic", rpc_url.trim_end_matches('/'));
+    let mut headers = HashMap::new();
+    headers.insert("Content-Type".to_string(), "application/json".to_string());
 
     // Prefer env var, otherwise fall back to demo key.
-    let api_key = std::env::var("POLKADOT_SUBSCAN_API_KEY").unwrap_or_else(|_| DEMO_SUBSCAN_API_KEY.to_string());
+    let api_key = std::env::var("POLKADOT_SUBSCAN_API_KEY")
+        .unwrap_or_else(|_| DEMO_SUBSCAN_API_KEY.to_string());
     let trimmed = api_key.trim();
     if !trimmed.is_empty() {
-        request = request.set("X-API-Key", trimmed);
+        headers.insert("X-API-Key".to_string(), trimmed.to_string());
     }
 
-    let response = match request.send_json(payload) {
-        Ok(resp) => resp,
-        Err(ureq::Error::Status(_, resp)) => {
-            let body: Value = resp
-                .into_json()
-                .map_err(|err| DecodeError::Rpc(format!("invalid subscan json: {err}")))?;
-            return validate_subscan_payload(body);
-        }
-        Err(err) => return Err(DecodeError::Rpc(err.to_string())),
-    };
-
-    let body: Value = response
-        .into_json()
-        .map_err(|err| DecodeError::Rpc(format!("invalid subscan json: {err}")))?;
+    let body = post_json_with_failover(&rpc_url, &payload, Some(&headers))?;
 
     validate_subscan_payload(body)
 }

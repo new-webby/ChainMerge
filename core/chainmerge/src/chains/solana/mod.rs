@@ -1,5 +1,6 @@
 use serde_json::{json, Value};
 
+use crate::chainrpc::post_json_with_failover;
 use crate::errors::DecodeError;
 use crate::traits::ChainDecoder;
 use crate::types::{
@@ -8,6 +9,7 @@ use crate::types::{
 
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const TOKEN_2022_PROGRAM_ID: &str = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+const SYSTEM_PROGRAM_ID: &str = "11111111111111111111111111111111";
 
 pub struct SolanaDecoder;
 
@@ -20,18 +22,37 @@ impl ChainDecoder for SolanaDecoder {
         let tx = fetch_transaction(&request.rpc_url, &request.tx_hash)?;
         let events = extract_token_transfer_events(&tx);
 
-        if events.is_empty() {
-            return Err(DecodeError::UnsupportedEvent);
-        }
+        let (final_events, sender, receiver, value) = if events.is_empty() {
+            let tx_sender = tx
+                .pointer("/transaction/message/accountKeys/0/pubkey")
+                .or_else(|| tx.pointer("/transaction/message/accountKeys/0"))
+                .and_then(Value::as_str)
+                .map(ToString::to_string);
 
-        let sender = events.first().and_then(|e| e.from.clone());
-        let receiver = events.first().and_then(|e| e.to.clone());
-        let value = events.first().and_then(|e| e.amount.clone());
+            let unsupported_event = NormalizedEvent {
+                event_type: EventType::Unsupported,
+                token: None,
+                from: tx_sender.clone(),
+                to: None,
+                amount: None,
+                raw_program: Some("solana_generic_tx".to_string()),
+            };
+            (vec![unsupported_event], tx_sender, None, None)
+        } else {
+            let s = events.first().and_then(|e| e.from.clone());
+            let r = events.first().and_then(|e| e.to.clone());
+            let v = events.first().and_then(|e| e.amount.clone());
+            (events, s, r, v)
+        };
 
-        let actions = events
+        let actions = final_events
             .iter()
             .map(|e| Action {
-                action_type: ActionType::Transfer,
+                action_type: if matches!(e.event_type, EventType::Unsupported) {
+                    ActionType::Unknown
+                } else {
+                    ActionType::Transfer
+                },
                 from: e.from.clone(),
                 to: e.to.clone(),
                 amount: e.amount.clone(),
@@ -46,7 +67,7 @@ impl ChainDecoder for SolanaDecoder {
             sender,
             receiver,
             value,
-            events,
+            events: final_events,
             actions,
         })
     }
@@ -67,14 +88,7 @@ fn fetch_transaction(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError>
         ]
     });
 
-    let response = ureq::post(rpc_url)
-        .set("Content-Type", "application/json")
-        .send_json(payload)
-        .map_err(|err| DecodeError::Rpc(err.to_string()))?;
-
-    let body: Value = response
-        .into_json()
-        .map_err(|err| DecodeError::Rpc(format!("invalid RPC json: {err}")))?;
+    let body = post_json_with_failover(rpc_url, &payload, None)?;
 
     if let Some(err) = body.get("error") {
         return Err(DecodeError::Rpc(format!("rpc returned error: {err}")));
@@ -131,7 +145,10 @@ fn maybe_push_transfer_event(instruction: &Value, events: &mut Vec<NormalizedEve
         return;
     };
 
-    if program_id != TOKEN_PROGRAM_ID && program_id != TOKEN_2022_PROGRAM_ID {
+    if program_id != TOKEN_PROGRAM_ID
+        && program_id != TOKEN_2022_PROGRAM_ID
+        && program_id != SYSTEM_PROGRAM_ID
+    {
         return;
     }
 
@@ -159,21 +176,25 @@ fn maybe_push_transfer_event(instruction: &Value, events: &mut Vec<NormalizedEve
         .get("destination")
         .and_then(Value::as_str)
         .map(ToString::to_string);
-    let token = info
-        .get("mint")
-        .and_then(Value::as_str)
-        .map(ToString::to_string);
-
     let amount = info
         .get("amount")
         .and_then(Value::as_str)
         .map(ToString::to_string)
+        .or_else(|| info.get("lamports").and_then(|v| v.as_u64()).map(|v| v.to_string()))
         .or_else(|| {
             info.get("tokenAmount")
                 .and_then(|t| t.get("amount"))
                 .and_then(Value::as_str)
                 .map(ToString::to_string)
         });
+
+    let token = if program_id == SYSTEM_PROGRAM_ID {
+        Some("SOL".to_string())
+    } else {
+        info.get("mint")
+            .and_then(Value::as_str)
+            .map(ToString::to_string)
+    };
 
     events.push(NormalizedEvent {
         event_type: EventType::TokenTransfer,
@@ -263,13 +284,44 @@ mod tests {
     }
 
     #[test]
-    fn ignores_non_token_program_instructions() {
+    fn extracts_native_sol_transfer() {
         let tx = json!({
             "transaction": {
                 "message": {
                     "instructions": [
                         {
                             "programId": "11111111111111111111111111111111",
+                            "parsed": {
+                                "type": "transfer",
+                                "info": {
+                                    "source": "sender_address",
+                                    "destination": "receiver_address",
+                                    "lamports": 1000000000u64
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "meta": { "innerInstructions": [] }
+        });
+
+        let events = extract_token_transfer_events(&tx);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].token.as_deref(), Some("SOL"));
+        assert_eq!(events[0].amount.as_deref(), Some("1000000000"));
+        assert_eq!(events[0].from.as_deref(), Some("sender_address"));
+        assert_eq!(events[0].to.as_deref(), Some("receiver_address"));
+    }
+
+    #[test]
+    fn ignores_non_token_program_instructions() {
+        let tx = json!({
+            "transaction": {
+                "message": {
+                    "instructions": [
+                        {
+                            "programId": "99999999999999999999999999999999",
                             "parsed": {
                                 "type": "transfer",
                                 "info": {

@@ -52,7 +52,7 @@ impl ChainDecoder for BitcoinDecoder {
 
 fn fetch_transaction(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError> {
     // Expects a Blockstream-compatible endpoint base (e.g. https://blockstream.info/api).
-    let body = get_json_with_failover(rpc_url, &format!("/tx/{tx_hash}"))?;
+    let body = get_json_with_failover(rpc_url, &format!("/tx/{tx_hash}"), None)?;
 
     if body.get("txid").is_none() {
         return Err(DecodeError::Rpc("bitcoin endpoint returned unexpected payload".to_string()));

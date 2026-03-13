@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChainMerge</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #05070a;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-hover: rgba(255, 255, 255, 0.06);
+      --accent: #007aff;
+      --accent-grad: linear-gradient(135deg, #007aff, #5856d6);
+      --ink: #ffffff;
+      --ink-dim: #8e8e93;
+      --border: rgba(255, 255, 255, 0.1);
+      --green: #34c759;
+      --red: #ff3b30;
+      --glass: saturate(180%) blur(20px);
+    }
+
+    body {
+      width: 380px;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: var(--glass);
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-icon { font-size: 24px; filter: drop-shadow(0 0 8px var(--accent)); }
+    .header-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #fff, #a2a2a2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 3px;
+      margin: 16px 16px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: none;
+      color: var(--ink-dim);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 9px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .tab-content { display: none; padding: 20px 16px; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Forms */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .input-group { margin-bottom: 18px; }
+    
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--ink);
+      padding: 12px;
+      font-size: 12.5px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input:focus, select:focus {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--ink-dim);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+    .clear-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent-grad);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 8px 16px rgba(0, 122, 255, 0.2);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3); }
+    .btn-primary:active { transform: translateY(0) scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+    /* Results */
+    .results-area {
+      margin-top: 20px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: none;
+      backdrop-filter: var(--glass);
+    }
+    .results-header {
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; font-weight: 600;
+      color: var(--ink-dim);
+    }
+    .output-pre {
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      overflow-x: auto;
+      max-height: 280px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .json-key { color: #8ab4f8; }
+    .json-str { color: #81c995; }
+    .json-num { color: #f29900; }
+
+    /* AI Section */
+    .ai-box {
+      margin-top: 14px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(88, 86, 214, 0.05));
+      border: 1px solid rgba(0, 122, 255, 0.2);
+      border-radius: 14px;
+      display: none;
+      backdrop-filter: var(--glass);
+    }
+    .ai-title {
+      font-size: 10px; font-weight: 800; color: var(--accent);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .ai-content { font-size: 12px; line-height: 1.6; color: #fff; opacity: 0.9; }
+
+    /* Settings UI */
+    .status-pill {
+      font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+    }
+    .status-pill.set { background: rgba(52, 199, 89, 0.15); color: var(--green); }
+    .status-pill.unset { background: rgba(255, 59, 48, 0.1); color: var(--red); }
+
+    .api-display {
+      background: rgba(255,255,255,0.03);
+      padding: 12px; border-radius: 10px; font-family: monospace; font-size: 11.5px;
+      margin-bottom: 14px; border: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .health-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
+    .health-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .health-dot.offline { background: var(--red); box-shadow: 0 0 10px var(--red); }
+
+    .footer {
+      padding: 16px; text-align: center; font-size: 10px; color: var(--ink-dim);
+      border-top: 1px solid var(--border);
+      opacity: 0.6;
+    }
+
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+      background: #fff; color: #000; padding: 8px 20px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none; z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <span class="header-icon">⛓</span>
+      <div class="header-text">
+        <h1>ChainMerge</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="decode">Decode</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+
+  <!-- Decode Tab -->
+  <div id="decode-tab" class="tab-content active">
+    <div class="input-group">
+      <span class="section-title">Network</span>
+      <select id="chain-select">
+        <option value="ethereum">Ethereum</option>
+        <option value="solana">Solana</option>
+        <option value="cosmos">Cosmos</option>
+        <option value="aptos">Aptos</option>
+        <option value="sui">Sui</option>
+        <option value="polkadot">Polkadot</option>
+        <option value="bitcoin">Bitcoin</option>
+        <option value="starknet">Starknet</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <span class="section-title">Transaction Hash</span>
+      <div class="input-container">
+        <input type="text" id="hash-input" placeholder="0x... or base58 hash" spellcheck="false">
+        <button id="clear-hash-btn" class="clear-btn">✕</button>
+      </div>
+    </div>
+
+    <button id="decode-btn" class="btn-primary">
+      <span>⚡</span> Decode Transaction
+    </button>
+
+    <div id="results-area" class="results-area">
+      <div class="results-header">
+        <span>NORMALIZED OUTPUT</span>
+        <button id="copy-btn" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:10px; font-weight:800; letter-spacing:0.05em;">COPY JSON</button>
+      </div>
+      <pre id="output-pre" class="output-pre"></pre>
+    </div>
+
+    <div id="ai-box" class="ai-box">
+      <div class="ai-title">✨ AI EXPLANATION</div>
+      <div id="ai-content" class="ai-content"></div>
+    </div>
+  </div>
+
+  <!-- Settings Tab -->
+  <div id="settings-tab" class="tab-content">
+    <div class="input-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="section-title">ChainMerge API Key</span>
+        <span id="cm-key-status" class="status-pill unset">Not Set</span>
+      </div>
+      <input type="password" id="cm-key-input" placeholder="x-api-key...">
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button id="save-cm-key-btn" class="tab-btn" style="background:rgba(255,255,255,0.06); flex:1;">Save Key</button>
+        <button id="clear-cm-key-btn" class="tab-btn" style="background:rgba(255, 59, 48, 0.1); color:var(--red); flex:1;">Clear</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="section-title">Gemini API Key</span>
+        <span id="key-status" class="status-pill unset">Not Set</span>
+      </div>
+      <input type="password" id="gemini-key-input" placeholder="AIza...">
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button id="save-key-btn" class="tab-btn" style="background:rgba(255,255,255,0.06); flex:1;">Save Key</button>
+        <button id="clear-key-btn" class="tab-btn" style="background:rgba(255, 59, 48, 0.1); color:var(--red); flex:1;">Clear</button>
+      </div>
+    </div>
+
+    <div class="input-group" style="margin-top:24px;">
+      <span class="section-title">API Server</span>
+      <div class="api-display">
+        <span id="api-url-display">localhost:8080</span>
+        <div id="health-dot" class="health-dot"></div>
+      </div>
+      <input type="text" id="api-url-input" placeholder="http://localhost:8080">
+      <button id="save-url-btn" class="tab-btn" style="background:rgba(255,255,255,0.06); width:100%; margin-top:10px; padding:10px;">Update URL</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    ChainMerge · v1.1.0
+  </div>
+
+  <div id="toast" class="toast">✓ Success</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

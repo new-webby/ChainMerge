@@ -2,14 +2,17 @@
 
 Use these RPC/base URLs with ChainCodec:
 
-- `ethereum` (JSON-RPC): `https://ethereum-rpc.publicnode.com`
-- `solana` (JSON-RPC): `https://api.mainnet-beta.solana.com`
-- `cosmos` (REST/LCD base): `https://rest.cosmos.directory/cosmoshub`
-- `aptos` (REST base): `https://api.mainnet.aptoslabs.com/v1`
-- `sui` (JSON-RPC): `https://fullnode.mainnet.sui.io:443`
-- `bitcoin` (Blockstream-style REST base): `https://blockstream.info/api`
-- `polkadot` (Subscan base, required by current decoder): `https://polkadot.api.subscan.io`
-- `starknet` (JSON-RPC): `https://rpc.starknet.lava.build`
+### Global Default RPC URLs
+The system uses a chained failover mechanism: **Public Node 1 -> Alchemy Fallback**. If the public node fails or is rate-limited, the system automatically retries with your Alchemy endpoint.
+
+- **ethereum**: `https://ethereum-rpc.publicnode.com` (Fallback: Alchemy)
+- **solana**: `https://api.mainnet-beta.solana.com` (Fallback: Alchemy)
+- **cosmos**: `https://rest.cosmos.directory/cosmoshub`
+- **aptos**: `https://api.mainnet.aptoslabs.com/v1` (Fallback: Alchemy)
+- **sui**: `https://fullnode.mainnet.sui.io:443` (Fallback: Alchemy)
+- **bitcoin**: `https://blockstream.info/api` (Fallback: Alchemy)
+- **starknet**: `https://rpc.starknet.lava.build` (Fallback: Alchemy)
+- **polkadot**: `https://polkadot.api.subscan.io` (Requires Subscan API Key)
 
 Notes:
 - `polkadot` requires `POLKADOT_SUBSCAN_API_KEY`.

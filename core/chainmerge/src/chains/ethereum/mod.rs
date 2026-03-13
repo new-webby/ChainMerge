@@ -1,6 +1,7 @@
 use num_bigint::BigUint;
 use serde_json::{json, Value};
 
+use crate::chainrpc::post_json_with_failover;
 use crate::errors::DecodeError;
 use crate::traits::ChainDecoder;
 use crate::types::{
@@ -68,14 +69,7 @@ fn fetch_transaction_receipt(rpc_url: &str, tx_hash: &str) -> Result<Value, Deco
         "params": [tx_hash]
     });
 
-    let response = ureq::post(rpc_url)
-        .set("Content-Type", "application/json")
-        .send_json(payload)
-        .map_err(|err| DecodeError::Rpc(err.to_string()))?;
-
-    let body: Value = response
-        .into_json()
-        .map_err(|err| DecodeError::Rpc(format!("invalid RPC json: {err}")))?;
+    let body = post_json_with_failover(rpc_url, &payload, None)?;
 
     if let Some(err) = body.get("error") {
         return Err(DecodeError::Rpc(format!("rpc returned error: {err}")));
@@ -100,14 +94,7 @@ fn fetch_transaction_by_hash(rpc_url: &str, tx_hash: &str) -> Result<Value, Deco
         "params": [tx_hash]
     });
 
-    let response = ureq::post(rpc_url)
-        .set("Content-Type", "application/json")
-        .send_json(payload)
-        .map_err(|err| DecodeError::Rpc(err.to_string()))?;
-
-    let body: Value = response
-        .into_json()
-        .map_err(|err| DecodeError::Rpc(format!("invalid RPC json: {err}")))?;
+    let body = post_json_with_failover(rpc_url, &payload, None)?;
 
     if let Some(err) = body.get("error") {
         return Err(DecodeError::Rpc(format!("rpc returned error: {err}")));

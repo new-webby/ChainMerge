@@ -8,6 +8,7 @@ Quick docs:
 - Usage: [USAGE_README.md](USAGE_README.md)
 - Startup: [STARTUP_README.md](STARTUP_README.md)
 - RPC URLs: [rpcURLS.MD](rpcURLS.MD)
+- Alchemy Guide: [ALCHEMY_README.md](ALCHEMY_README.md)
 
 ## Core Idea
 

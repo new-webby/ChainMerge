@@ -61,7 +61,7 @@ fn fetch_receipt(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError> {
         "params": [rpc_tx_hash]
     });
 
-    let body = post_json_with_failover(rpc_url, &payload)?;
+    let body = post_json_with_failover(rpc_url, &payload, None)?;
 
     if let Some(err) = body.get("error") {
         return Err(DecodeError::Rpc(format!("starknet rpc returned error: {err}")));

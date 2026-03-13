@@ -1,5 +1,6 @@
 use serde_json::Value;
 
+use crate::chainrpc::get_json_with_failover;
 use crate::errors::DecodeError;
 use crate::traits::ChainDecoder;
 use crate::types::{
@@ -50,19 +51,7 @@ impl ChainDecoder for CosmosDecoder {
 }
 
 fn fetch_transaction(rpc_url: &str, tx_hash: &str) -> Result<Value, DecodeError> {
-    let url = format!(
-        "{}/cosmos/tx/v1beta1/txs/{}",
-        rpc_url.trim_end_matches('/'),
-        tx_hash
-    );
-
-    let response = ureq::get(&url)
-        .call()
-        .map_err(|err| DecodeError::Rpc(err.to_string()))?;
-
-    let body: Value = response
-        .into_json()
-        .map_err(|err| DecodeError::Rpc(format!("invalid REST json: {err}")))?;
+    let body = get_json_with_failover(rpc_url, &format!("/cosmos/tx/v1beta1/txs/{}", tx_hash), None)?;
 
     if body.get("code").is_some() && body.get("message").is_some() {
         return Err(DecodeError::Rpc(format!("cosmos api returned error: {body}")));

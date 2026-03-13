@@ -51,7 +51,11 @@ pub fn parse_rpc_endpoints(rpc_urls: &str) -> Vec<RpcEndpoint> {
         .collect()
 }
 
-pub fn get_json_with_failover(rpc_urls: &str, path: &str) -> Result<Value, DecodeError> {
+pub fn get_json_with_failover(
+    rpc_urls: &str,
+    path: &str,
+    headers: Option<&HashMap<String, String>>,
+) -> Result<Value, DecodeError> {
     let endpoints = parse_rpc_endpoints(rpc_urls);
     if endpoints.is_empty() {
         return Err(DecodeError::InvalidRequest(
@@ -71,9 +75,15 @@ pub fn get_json_with_failover(rpc_urls: &str, path: &str) -> Result<Value, Decod
         let url = format!("{}{}", endpoint.url.trim_end_matches('/'), path);
 
         for _ in 0..RETRIES_PER_ENDPOINT {
-            let result = ureq::get(&url)
-                .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
-                .call();
+            let mut request = ureq::get(&url).timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS));
+
+            if let Some(h) = headers {
+                for (k, v) in h {
+                    request = request.set(k, v);
+                }
+            }
+
+            let result = request.call();
 
             match result {
                 Ok(response) => {
@@ -97,7 +107,11 @@ pub fn get_json_with_failover(rpc_urls: &str, path: &str) -> Result<Value, Decod
     )))
 }
 
-pub fn post_json_with_failover(rpc_urls: &str, payload: &Value) -> Result<Value, DecodeError> {
+pub fn post_json_with_failover(
+    rpc_urls: &str,
+    payload: &Value,
+    headers: Option<&HashMap<String, String>>,
+) -> Result<Value, DecodeError> {
     let endpoints = parse_rpc_endpoints(rpc_urls);
     if endpoints.is_empty() {
         return Err(DecodeError::InvalidRequest(
@@ -116,10 +130,17 @@ pub fn post_json_with_failover(rpc_urls: &str, payload: &Value) -> Result<Value,
         }
 
         for _ in 0..RETRIES_PER_ENDPOINT {
-            let result = ureq::post(&endpoint.url)
+            let mut request = ureq::post(&endpoint.url)
                 .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
-                .set("Content-Type", "application/json")
-                .send_json(payload.clone());
+                .set("Content-Type", "application/json");
+
+            if let Some(h) = headers {
+                for (k, v) in h {
+                    request = request.set(k, v);
+                }
+            }
+
+            let result = request.send_json(payload.clone());
 
             match result {
                 Ok(response) => {
