@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChainMerge · TX Decoder",
-  "version": "1.2.0",
+  "version": "1.3.3",
   "description": "Automatically decodes blockchain transactions on block explorers using ChainMerge and Gemini AI.",
   "icons": {
     "16":  "icons/icon16.png",

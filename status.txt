@@ -1,0 +1,49 @@
+On branch decoder-fix
+Your branch is up to date with 'origin/decoder-fix'.
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   .gitignore
+	new file:   ARCH_RUST_TO_SDK.md
+	modified:   CHAINMERGE_SDK_DOC.md
+	modified:   sdk/js/README.md
+	modified:   sdk/js/package-lock.json
+	modified:   sdk/js/package.json
+	modified:   sdk/js/src/client.ts
+	modified:   sdk/js/src/types.ts
+	modified:   sdk/js/tsconfig.build.tsbuildinfo
+	modified:   sdk/python/README.md
+	modified:   sdk/python/chainmerge_sdk/client.py
+	modified:   sdk/python/chainmerge_sdk/types.py
+	modified:   sdk/python/pyproject.toml
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both modified:   services/api/src/main.rs
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   README.md
+	modified:   apps/extension/background.js
+	modified:   apps/extension/content.js
+	modified:   apps/extension/manifest.json
+	modified:   apps/extension/panel.css
+	modified:   apps/extension/popup.html
+	modified:   apps/extension/popup.js
+	modified:   apps/web/src/App.tsx
+	modified:   apps/web/src/styles.css
+	modified:   core/chainmerge/src/types/mod.rs
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	chainmerge-extension-v1.3.0.zip
+	chainmerge-extension-v1.3.1.zip
+	chainmerge-extension-v1.3.2.zip
+	chainmerge-extension-v1.3.3.zip
+	status.txt
+	unmerged.txt
+

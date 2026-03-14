@@ -480,3 +480,42 @@ select option {
   .panel { padding: 1.25rem; }
   h1 { font-size: 1.5rem; }
 }
+/* ── AI Forensic Section ───────────────────────────────────────── */
+.ai-reasoning {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(124, 92, 252, 0.2);
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+
+.ai-box {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(79, 142, 255, 0.08) 0%, rgba(124, 92, 252, 0.05) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+
+.ai-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #fff;
+  opacity: 0.9;
+}

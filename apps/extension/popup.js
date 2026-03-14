@@ -34,6 +34,7 @@ const apiUrlDisplay = document.getElementById('api-url-display');
 const healthDot     = document.getElementById('health-dot');
 const toast         = document.getElementById('toast');
 const alertsContainer = document.getElementById('alerts-container');
+const aiReasoning    = document.getElementById('ai-reasoning');
 
 const WHALE_ETH_THRESHOLD = 50; 
 const WHALE_TOKEN_THRESHOLD = 100000;
@@ -296,11 +297,14 @@ async function explainWithAi(decoded) {
   aiBox.classList.add('animate-in');
   
   aiContent.textContent = '';
+  aiReasoning.textContent = '';
+  aiReasoning.style.display = 'none';
+  
   const spinner = document.createElement('div');
   spinner.className = 'spinner';
   spinner.style.margin = '8px 0';
   aiContent.appendChild(spinner);
-  aiContent.appendChild(document.createTextNode(' Generating explanation...'));
+  aiContent.appendChild(document.createTextNode(' Forensic reasoning in progress...'));
 
   chrome.runtime.sendMessage({ 
     type: 'CM_GEMINI_EXPLAIN', 
@@ -308,6 +312,10 @@ async function explainWithAi(decoded) {
   }, (res) => {
     aiContent.textContent = '';
     if (res && res.ok) {
+      if (res.thought) {
+        aiReasoning.style.display = 'block';
+        aiReasoning.textContent = res.thought;
+      }
       aiContent.textContent = res.text;
     } else {
       const errorSpan = document.createElement('span');

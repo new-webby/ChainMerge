@@ -19,6 +19,8 @@ type DecodeSuccess = {
   };
 };
 
+
+
 type DecodeFailure = {
   error: {
     code: string;
@@ -115,7 +117,9 @@ export function App() {
       const body = (await res.json()) as DecodeSuccess | DecodeFailure;
 
       if (!res.ok) { setError(body as DecodeFailure); return; }
+      const decoded = (body as DecodeSuccess).decoded;
       setResponse(body as DecodeSuccess);
+      
     } catch (err) {
       setError({
         error: {
@@ -264,6 +268,7 @@ export function App() {
             <span>Run a decode request to see the normalized JSON response here.</span>
           </div>
         )}
+
 
         {hasOutput && (
           <div className="output-block">
