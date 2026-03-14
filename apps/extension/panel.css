@@ -286,6 +286,19 @@
   color: #c8d4f0;
 }
 
+.cm-ai-reasoning {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #8a97b0;
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid #7c5cfc;
+  max-height: 100px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
 .cm-ai-loading {
   display: flex;
   align-items: center;

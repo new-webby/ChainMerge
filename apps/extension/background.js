@@ -90,19 +90,26 @@ async function handleGeminiExplain({ decoded }, apiKey) {
     }
     
     const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const candidate = data.candidates?.[0]?.content?.parts || [];
     
-    // Ensure we don't return a half-baked sentence if the model drifted
+    let thought = "";
+    let text = "";
+
+    candidate.forEach(p => {
+      if (p.thought) thought += p.thought;
+      if (p.text) text += p.text;
+    });
+
+    if (!text && candidate[0]?.text) text = candidate[0].text;
+
+    // Post-process text
     let cleaned = text?.trim() || 'No explanation generated.';
     if (cleaned !== 'No explanation generated.' && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
-        // Find last punctuation and cut there if it seems truncated
         const lastPunc = Math.max(cleaned.lastIndexOf('.'), cleaned.lastIndexOf('!'), cleaned.lastIndexOf('?'));
-        if (lastPunc > 0) {
-            cleaned = cleaned.substring(0, lastPunc + 1);
-        }
+        if (lastPunc > 0) cleaned = cleaned.substring(0, lastPunc + 1);
     }
 
-    return { ok: true, text: cleaned };
+    return { ok: true, text: cleaned, thought: thought.trim() };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -110,18 +117,22 @@ async function handleGeminiExplain({ decoded }, apiKey) {
 
 function buildPrompt(tx) {
   const event = tx.events?.[0] || {};
-  function truncate(s, n=10) { return s && s.length > n*2+3 ? `${s.slice(0,n)}...${s.slice(-n)}` : s; }
+  return `Perform a deep forensic analysis of this blockchain transaction. 
+Identify the likely intent (e.g., Arbitrage, Token Swap, Whale Movement, Phishing, Bridge).
 
-  return `Explain this blockchain transaction in maximum 2 clear, simple sentences for a non-technical user.
+Provide a concise forensic report in maximum 2 clear, simple sentences for a non-technical user.
 CRITICAL: You MUST provide a complete explanation and finish every sentence. NEVER stop mid-sentence.
-Keep the total response under 400 characters.
+Keep the final output under 400 characters.
+
+Transaction Data:
 Chain: ${tx.chain}
-Hash: ${truncate(tx.tx_hash)}
-Sender: ${truncate(tx.sender) || 'unknown'}
-Receiver: ${truncate(tx.receiver) || 'unknown'}
+Hash: ${tx.tx_hash}
+Sender: ${tx.sender || 'unknown'}
+Receiver: ${tx.receiver || 'unknown'}
 Value: ${tx.value || '0'}
 Type: ${event.event_type || 'transaction'}
 ${event.token ? `Token: ${event.token}` : ''}
 ${event.amount ? `Amount: ${event.amount}` : ''}
-Respond only with the plain English explanation.`;
+
+Respond only with the plain English report.`;
 }

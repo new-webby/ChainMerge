@@ -1,14 +1,12 @@
-# ChainMerge + ChainKit
+# ChainMerge Forensic: Gemini 3 API Challenge Submission
 
-Unified multichain decoding infrastructure focused on deterministic, chain-agnostic transaction normalization.
+ChainMerge Forensic is a multichain transaction analyst that pivots from simple decoding into deep intent reasoning. Built for the **Gemini 3 API Challenge**, it leverages advanced AI to explain *why* transactions happen across 8+ different blockchain ecosystems.
 
-Quick docs:
-- Final overview: [FINAL_README.md](FINAL_README.md)
-- Setup (non-docker): [SETUP_README.md](SETUP_README.md)
-- Usage: [USAGE_README.md](USAGE_README.md)
-- Startup: [STARTUP_README.md](STARTUP_README.md)
-- RPC URLs: [rpcURLS.MD](rpcURLS.MD)
-- Alchemy Guide: [ALCHEMY_README.md](ALCHEMY_README.md)
+## 🚀 Key Forensic Features
+- **Forensic Analysis**: Powered by `gemini-1.5-flash` to detect intent (Arbitrage, Swaps, Phishing).
+- **Transparency**: Displays the AI's "Thought Process" (reasoning) alongside the final report.
+- **Multichain Forensic**: Normalizes raw data from Ethereum, Solana, Cosmos, Aptos, Sui, and more into readable narratives.
+- **Whale Alert System**: Real-time identification of high-value transfers.
 
 ## Core Idea
 

@@ -56,6 +56,15 @@ pub enum EventType {
     Unsupported,
 }
 
+impl EventType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            EventType::TokenTransfer => "token_transfer",
+            EventType::Unsupported => "unsupported",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NormalizedEvent {
     pub event_type: EventType,
@@ -75,6 +84,19 @@ pub enum ActionType {
     Stake,
     Bridge,
     Unknown,
+}
+
+impl ActionType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ActionType::Transfer => "transfer",
+            ActionType::Swap => "swap",
+            ActionType::NftTransfer => "nft_transfer",
+            ActionType::Stake => "stake",
+            ActionType::Bridge => "bridge",
+            ActionType::Unknown => "unknown",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

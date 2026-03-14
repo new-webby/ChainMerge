@@ -226,6 +226,20 @@
     .json-num { color: #d19a66; }
 
     /* AI Section */
+    .ai-reasoning {
+      margin-top: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(124, 92, 252, 0.3);
+      border-radius: 12px;
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--ink-dim);
+      max-height: 120px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
     .ai-box {
       margin-top: 14px;
       padding: 16px;
@@ -342,8 +356,10 @@
       <span>⚡</span> Decode Transaction
     </button>
 
+    <div id="ai-reasoning" class="ai-reasoning"></div>
+
     <div id="ai-box" class="ai-box">
-      <div class="ai-title">✨ AI EXPLANATION</div>
+      <div class="ai-title">✨ FORENSIC REPORT</div>
       <div id="ai-content" class="ai-content"></div>
     </div>
 
