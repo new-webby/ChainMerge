@@ -15,9 +15,11 @@ export interface ChainMergeClientOptions {
    * - "http://127.0.0.1:8080" for local development
    * - "https://api.chainmerge.io" for a hosted deployment
    *
+   * Defaults to "https://api.chainmerge.io" if not provided.
+   *
    * Do not include a trailing slash.
    */
-  baseUrl: string;
+  baseUrl?: string;
 
   /**
    * Optional API key that will be sent as "x-api-key".
@@ -36,12 +38,8 @@ export class ChainMergeClient {
   private readonly apiKey?: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: ChainMergeClientOptions) {
-    if (!options.baseUrl) {
-      throw new Error("ChainMergeClient: baseUrl is required");
-    }
-
-    this.baseUrl = options.baseUrl.replace(/\/+$/, "");
+  constructor(options: ChainMergeClientOptions = {}) {
+    this.baseUrl = (options.baseUrl || "https://api.chainmerge.io").replace(/\/+$/, "");
     this.apiKey = options.apiKey;
     this.fetchImpl = options.fetchImpl ?? fetch;
   }
