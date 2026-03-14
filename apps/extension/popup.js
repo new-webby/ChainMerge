@@ -33,6 +33,10 @@ const saveUrlBtn    = document.getElementById('save-url-btn');
 const apiUrlDisplay = document.getElementById('api-url-display');
 const healthDot     = document.getElementById('health-dot');
 const toast         = document.getElementById('toast');
+const alertsContainer = document.getElementById('alerts-container');
+
+const WHALE_ETH_THRESHOLD = 50; 
+const WHALE_TOKEN_THRESHOLD = 100000;
 
 let state = {
   chainmergeApiKey: '',
@@ -197,6 +201,7 @@ async function handleDecode() {
     });
 
     if (result && result.ok) {
+      renderAlerts(result.decoded);
       renderOutput(result.decoded);
       explainWithAi(result.decoded);
     } else {
@@ -207,6 +212,39 @@ async function handleDecode() {
   } finally {
     setLoading(false);
   }
+}
+
+function renderAlerts(tx) {
+  alertsContainer.textContent = '';
+  const event = tx.events?.[0] || {};
+  const alerts = [];
+
+  // Whale detection
+  const val = parseFloat(tx.value || '0');
+  const nativeVal = val > 1e15 ? val / 1e18 : val;
+  if (nativeVal > WHALE_ETH_THRESHOLD) {
+    alerts.push({ type: 'whale', msg: `🐋 Whale alert — large value transfer detected` });
+  }
+
+  // Token whale
+  const amount = parseFloat(event.amount || '0');
+  const tokenAmount = amount > 1e15 ? amount / 1e18 : amount;
+  if (tokenAmount > WHALE_TOKEN_THRESHOLD) {
+    alerts.push({ type: 'whale', msg: `🐋 Whale alert — ${tokenAmount.toLocaleString()} tokens moved` });
+  }
+
+  // Risk: zero-value send
+  if (tx.value === '0' && event.event_type !== 'token_transfer') {
+    alerts.push({ type: 'risk', msg: `⚠ Zero-value contract interaction` });
+  }
+
+  alerts.forEach(alert => {
+    const el = document.createElement('div');
+    el.className = `cm-alert cm-alert-${alert.type}`;
+    el.style.marginBottom = '10px';
+    el.textContent = alert.msg;
+    alertsContainer.appendChild(el);
+  });
 }
 
 function renderOutput(data) {

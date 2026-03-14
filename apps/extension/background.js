@@ -75,7 +75,11 @@ async function handleGeminiExplain({ decoded }, apiKey) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
+        generationConfig: { 
+          temperature: 0.4, 
+          maxOutputTokens: 1000,
+          topP: 0.95
+        }
       }),
       signal: AbortSignal.timeout(30000)
     });
@@ -87,7 +91,18 @@ async function handleGeminiExplain({ decoded }, apiKey) {
     
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    return { ok: true, text: text?.trim() || 'No explanation generated.' };
+    
+    // Ensure we don't return a half-baked sentence if the model drifted
+    let cleaned = text?.trim() || 'No explanation generated.';
+    if (cleaned !== 'No explanation generated.' && !cleaned.endsWith('.') && !cleaned.endsWith('!') && !cleaned.endsWith('?')) {
+        // Find last punctuation and cut there if it seems truncated
+        const lastPunc = Math.max(cleaned.lastIndexOf('.'), cleaned.lastIndexOf('!'), cleaned.lastIndexOf('?'));
+        if (lastPunc > 0) {
+            cleaned = cleaned.substring(0, lastPunc + 1);
+        }
+    }
+
+    return { ok: true, text: cleaned };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -97,8 +112,9 @@ function buildPrompt(tx) {
   const event = tx.events?.[0] || {};
   function truncate(s, n=10) { return s && s.length > n*2+3 ? `${s.slice(0,n)}...${s.slice(-n)}` : s; }
 
-  return `Explain this blockchain transaction in 2 simple sentences for a non-technical user.
-Keep the total response under 800 characters and ensure no sentence is cut off.
+  return `Explain this blockchain transaction in maximum 2 clear, simple sentences for a non-technical user.
+CRITICAL: You MUST provide a complete explanation and finish every sentence. NEVER stop mid-sentence.
+Keep the total response under 400 characters.
 Chain: ${tx.chain}
 Hash: ${truncate(tx.tx_hash)}
 Sender: ${truncate(tx.sender) || 'unknown'}

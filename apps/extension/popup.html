@@ -258,6 +258,13 @@
     .health-dot { width: 8px; height: 8px; border-radius: 50%; background: #444; }
     .health-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green); }
     .health-dot.offline { background: var(--red); box-shadow: 0 0 10px var(--red); }
+    
+    .cm-alert {
+      display: flex; align-items: center; gap: 8px; border-radius: 10px; padding: 10px 14px;
+      font-size: 11px; font-weight: 500; backdrop-filter: var(--glass); animation: slideUp 0.4s ease;
+    }
+    .cm-alert-whale { background: rgba(79,142,255,0.1); border: 1px solid rgba(79,142,255,0.25); color: #7ab3ff; }
+    .cm-alert-risk { background: rgba(240,91,110,0.1); border: 1px solid rgba(240,91,110,0.25); color: #f05b6e; }
 
     .footer {
       padding: 16px; text-align: center; font-size: 10px; color: var(--ink-dim);
@@ -339,6 +346,8 @@
       <div class="ai-title">✨ AI EXPLANATION</div>
       <div id="ai-content" class="ai-content"></div>
     </div>
+
+    <div id="alerts-container"></div>
 
     <div id="results-area" class="results-area">
       <div class="results-header">
