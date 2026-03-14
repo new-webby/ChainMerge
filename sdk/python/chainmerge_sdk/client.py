@@ -33,13 +33,13 @@ class ChainMergeClient:
     def __init__(
         self,
         *,
-        base_url: str,
+        base_url: str = "https://chainmerge-api.onrender.com",
         api_key: str | None = None,
         timeout: float = 15.0,
         transport: Transport | None = None,
     ) -> None:
         if not base_url or not base_url.strip():
-            raise ValueError("ChainMergeClient: base_url is required")
+            base_url = "https://chainmerge-api.onrender.com"
 
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key

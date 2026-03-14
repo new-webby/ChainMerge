@@ -30,7 +30,7 @@ python3 -m pip install -e .
 from chainmerge_sdk import ChainMergeClient
 
 client = ChainMergeClient(
-    base_url="http://127.0.0.1:8080",
+    base_url="https://chainmerge-api.onrender.com",
     # api_key="optional-api-key",
     timeout=15.0,
 )
@@ -70,7 +70,7 @@ from chainmerge_sdk import (
     ChainMergeTransportError,
 )
 
-client = ChainMergeClient(base_url="http://127.0.0.1:8080")
+client = ChainMergeClient(base_url="https://chainmerge-api.onrender.com")
 
 try:
     tx = client.decode_tx(chain="ethereum", tx_hash="0x...")

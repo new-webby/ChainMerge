@@ -53,7 +53,7 @@ class ChainMergeClientTests(unittest.TestCase):
             )
 
         client = ChainMergeClient(
-            base_url="http://127.0.0.1:8080/",
+            base_url="https://chainmerge-api.onrender.com/",
             api_key="secret",
             timeout=9.0,
             transport=transport,
@@ -95,7 +95,7 @@ class ChainMergeClientTests(unittest.TestCase):
                 ),
             )
 
-        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="https://chainmerge-api.onrender.com", transport=transport)
 
         with self.assertRaises(ChainMergeAPIError) as raised:
             client.decode_tx(chain="ethereum", tx_hash="bad")
@@ -110,13 +110,13 @@ class ChainMergeClientTests(unittest.TestCase):
         def transport(url: str, headers: dict[str, str], timeout: float) -> tuple[int, str]:
             return 200, "not-json"
 
-        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="https://chainmerge-api.onrender.com", transport=transport)
 
         with self.assertRaises(ChainMergeTransportError):
             client.decode_tx(chain="ethereum", tx_hash="0xabc")
 
     def test_decode_tx_rejects_unsupported_chain(self) -> None:
-        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=lambda *_: (200, "{}"))
+        client = ChainMergeClient(base_url="https://chainmerge-api.onrender.com", transport=lambda *_: (200, "{}"))
 
         with self.assertRaises(ValueError):
             client.decode_tx(chain="dogecoin", tx_hash="abc")
@@ -137,7 +137,7 @@ class ChainMergeClientTests(unittest.TestCase):
                 ),
             )
 
-        client = ChainMergeClient(base_url="http://127.0.0.1:8080", transport=transport)
+        client = ChainMergeClient(base_url="https://chainmerge-api.onrender.com", transport=transport)
         tx = client.decodeTx(chain="ethereum", hash="0xtest")
         self.assertEqual(tx.tx_hash, "0xtest")
 
