@@ -18,7 +18,7 @@ yarn add chainmerge-sdk
 import { ChainMergeClient } from "chainmerge-sdk";
 
 const client = new ChainMergeClient({
-  // baseUrl is optional, defaults to "https://api.chainmerge.io"
+  // baseUrl is optional, defaults to "https://chainmerge-api.onrender.com"
   // apiKey: "optional-api-key",
 });
 
@@ -48,7 +48,7 @@ main().catch((err) => {
 
 ### `new ChainMergeClient(options)`
 
-- **`baseUrl`** (string, optional): Base URL of the ChainMerge API. Defaults to `https://api.chainmerge.io`. No trailing slash.
+- **`baseUrl`** (string, optional): Base URL of the ChainMerge API. Defaults to `https://chainmerge-api.onrender.com`. No trailing slash.
 - **`apiKey`** (string, optional): Sent as `x-api-key` header if provided.
 - **`fetchImpl`** (function, optional): Custom `fetch` implementation for environments where `fetch` is not global (e.g. Node.js < 18).
 
