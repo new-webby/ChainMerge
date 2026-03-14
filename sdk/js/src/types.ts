@@ -52,8 +52,32 @@ export interface ErrorEnvelope {
   retryable: boolean;
 }
 
+export interface HealthResponse {
+  status: string;
+  service: string;
+}
+
+export interface ExampleTx {
+  chain: string;
+  tx_hash: string;
+  note: string;
+}
+
+export interface ExamplesResponse {
+  examples: ExampleTx[];
+}
+
 export interface DecodeSuccessEnvelope {
   decoded: NormalizedTransaction;
+}
+
+export interface IndexedDecodeResponse {
+  indexed: boolean;
+  decoded: NormalizedTransaction;
+}
+
+export interface IndexedListResponse {
+  items: NormalizedTransaction[];
 }
 
 export interface DecodeErrorEnvelope {

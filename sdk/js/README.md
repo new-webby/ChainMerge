@@ -58,7 +58,25 @@ Decode a single transaction.
 
 - **`chain`**: One of `"solana" | "ethereum" | "cosmos" | "aptos" | "sui" | "polkadot" | "bitcoin" | "starknet"`.
 - **`hash`**: Transaction hash string.
-- **`rpcUrl`** (optional): Override RPC URL for this request; if omitted, ChainMerge's internal defaults and env config are used.
+- **`rpcUrl`** (optional): Override RPC URL for this request.
+
+### `client.health()`
+Returns a `Promise<HealthResponse>` with `{ status: 'ok', service: 'chainmerge-api' }`.
+
+### `client.examples()`
+Returns a `Promise<ExamplesResponse>` containing supported example transactions and chains.
+
+### `client.metrics()`
+Returns a `Promise<any>` with internal API metrics.
+
+### `client.decodeAndIndexTx({ chain, hash, rpcUrl? })`
+Decodes and stores the transaction in the index database.
+
+### `client.lookupIndexedTx({ chain, hash })`
+Retrieves a previously indexed transaction.
+
+### `client.listRecentIndexedTxs({ limit? })`
+Lists recently indexed transactions.
 
 Returns a `Promise<NormalizedTransaction>`, where:
 

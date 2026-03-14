@@ -153,7 +153,74 @@ const tx = await client.decodeTx({
 - Resolves to a `NormalizedTransaction`.
 - Throws on error (see **Error handling** below).
 
-#### 5.3 Minimal Node example
+---
+
+### 6. Indexing and Utility Methods (v1.1)
+
+The v1.1.0 SDK adds support for caching, indexing, and health monitoring.
+
+#### 6.1 API Health and Metrics
+
+```ts
+const health = await client.health();
+console.log("Status:", health.status); // "ok"
+
+const metrics = await client.metrics();
+console.log("Prometheus Metrics:", metrics);
+```
+
+#### 6.2 Example Transactions
+
+```ts
+const { examples } = await client.examples();
+for (const ex of examples) {
+  console.log(`Chain: ${ex.chain}, Hash: ${ex.tx_hash} (${ex.note})`);
+}
+```
+
+#### 6.3 Using the Backend Index
+
+ChainMerge allows you to persist decoded transactions in a backend database (SQLite) for fast retrieval.
+
+```ts
+// Decode and save to index concurrently
+const tx = await client.decodeAndIndexTx({
+  chain: "ethereum",
+  hash: "0x...",
+});
+
+// Lookup from index (fast, no re-decode)
+const cachedTx = await client.lookupIndexedTx("ethereum", "0x...");
+
+// List the last 10 indexed transactions
+const recent = await client.listRecentIndexedTxs(10);
+```
+
+---
+
+### 7. Decoding a transaction
+
+The primary method is `decodeTx`.
+
+```ts
+const tx = await client.decodeTx({
+  chain: "ethereum",
+  hash: "0xd5d0587189f3411699ae946baa2a7d3ebfaf13133f9014a22bab6948591611ad",
+});
+```
+
+#### 7.1 Parameters
+
+- **`chain`**: one of the supported `Chain` keys.
+- **`hash`**: transaction hash/digest string.
+- **`rpcUrl`** (optional): per‑request RPC URL override; most apps can omit this and rely on backend defaults.
+
+#### 7.2 Return value
+
+- Resolves to a `NormalizedTransaction`.
+- Throws on error (see **Error handling** below).
+
+#### 7.3 Minimal Node example
 
 ```ts
 import { ChainMergeClient } from "chainmerge-sdk";

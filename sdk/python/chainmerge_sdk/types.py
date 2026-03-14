@@ -37,6 +37,34 @@ ActionType = Literal[
 ]
 
 
+@dataclass(frozen=True)
+class HealthResponse:
+    status: str
+    service: str
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "HealthResponse":
+        return cls(
+            status=str(value.get("status", "")),
+            service=str(value.get("service", "")),
+        )
+
+
+@dataclass(frozen=True)
+class ExampleTx:
+    chain: str
+    tx_hash: str
+    note: str
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "ExampleTx":
+        return cls(
+            chain=str(value.get("chain", "")),
+            tx_hash=str(value.get("tx_hash", "")),
+            note=str(value.get("note", "")),
+        )
+
+
 def _optional_string(value: Any) -> str | None:
     if value is None:
         return None
