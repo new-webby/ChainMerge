@@ -18,14 +18,14 @@ yarn add chainmerge-sdk
 import { ChainMergeClient } from "chainmerge-sdk";
 
 const client = new ChainMergeClient({
-  baseUrl: "http://127.0.0.1:8080", // or your hosted URL
+  // baseUrl is optional, defaults to "https://api.chainmerge.io"
   // apiKey: "optional-api-key",
 });
 
 async function main() {
   const tx = await client.decodeTx({
     chain: "ethereum",
-    hash: "0xd5d0587189f3411699ae946baa2a7d3ebfaf13133f9014a22bab6948591611ad",
+    hash: "0x8999.......",
   });
 
   console.log("normalized tx:", tx);
@@ -48,7 +48,7 @@ main().catch((err) => {
 
 ### `new ChainMergeClient(options)`
 
-- **`baseUrl`** (string, required): Base URL of the ChainMerge API (`http://127.0.0.1:8080`, `https://api.chainmerge.io`, etc.). No trailing slash.
+- **`baseUrl`** (string, optional): Base URL of the ChainMerge API. Defaults to `https://api.chainmerge.io`. No trailing slash.
 - **`apiKey`** (string, optional): Sent as `x-api-key` header if provided.
 - **`fetchImpl`** (function, optional): Custom `fetch` implementation for environments where `fetch` is not global (e.g. Node.js < 18).
 

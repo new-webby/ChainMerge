@@ -20,11 +20,7 @@ impl ChainDecoder for PolkadotDecoder {
 
     fn decode(&self, request: &DecodeRequest) -> Result<NormalizedTransaction, DecodeError> {
         let payload = fetch_extrinsic_details(&request.rpc_url, &request.tx_hash)?;
-        let events = extract_transfer_event(&payload);
-
-        if events.is_empty() {
-            return Err(DecodeError::UnsupportedEvent);
-        }
+        let events = extract_events(&payload);
 
         let sender = events.first().and_then(|e| e.from.clone());
         let receiver = events.first().and_then(|e| e.to.clone());
@@ -32,13 +28,19 @@ impl ChainDecoder for PolkadotDecoder {
 
         let actions = events
             .iter()
-            .map(|e| Action {
-                action_type: ActionType::Transfer,
-                from: e.from.clone(),
-                to: e.to.clone(),
-                amount: e.amount.clone(),
-                token: e.token.clone(),
-                metadata: None,
+            .map(|e| {
+                let action_type = match e.event_type {
+                    EventType::TokenTransfer => ActionType::Transfer,
+                    EventType::Unsupported => ActionType::Unknown,
+                };
+                Action {
+                    action_type,
+                    from: e.from.clone(),
+                    to: e.to.clone(),
+                    amount: e.amount.clone(),
+                    token: e.token.clone(),
+                    metadata: None,
+                }
             })
             .collect();
 
@@ -117,7 +119,7 @@ fn validate_subscan_payload(body: Value) -> Result<Value, DecodeError> {
     Ok(body)
 }
 
-fn extract_transfer_event(payload: &Value) -> Vec<NormalizedEvent> {
+fn extract_events(payload: &Value) -> Vec<NormalizedEvent> {
     let data = payload.get("data").unwrap_or(payload);
     let transfer = data.get("transfer").unwrap_or(&Value::Null);
 
@@ -135,8 +137,21 @@ fn extract_transfer_event(payload: &Value) -> Vec<NormalizedEvent> {
         .unwrap_or_default()
         .to_ascii_lowercase();
 
+    let raw_program = if module.is_empty() && function.is_empty() {
+        None
+    } else {
+        Some(format!("{}_{}", module, function))
+    };
+
     if module != "balances" || !function.contains("transfer") {
-        return Vec::new();
+        return vec![NormalizedEvent {
+            event_type: EventType::Unsupported,
+            token: None,
+            from: None,
+            to: None,
+            amount: None,
+            raw_program,
+        }];
     }
 
     let from = data
@@ -179,7 +194,14 @@ fn extract_transfer_event(payload: &Value) -> Vec<NormalizedEvent> {
         .or_else(|| Some("DOT".to_string()));
 
     if to.is_none() || amount.is_none() {
-        return Vec::new();
+        return vec![NormalizedEvent {
+            event_type: EventType::Unsupported,
+            token: None,
+            from: None,
+            to: None,
+            amount: None,
+            raw_program,
+        }];
     }
 
     vec![NormalizedEvent {
@@ -188,7 +210,7 @@ fn extract_transfer_event(payload: &Value) -> Vec<NormalizedEvent> {
         from,
         to,
         amount,
-        raw_program: Some("substrate_balances".to_string()),
+        raw_program,
     }]
 }
 
@@ -215,8 +237,9 @@ fn find_param_value(data: &Value, name: &str) -> Option<String> {
 mod tests {
     use serde_json::json;
 
-    use super::{extract_transfer_event, find_param_value, validate_subscan_payload};
+    use super::{extract_events, find_param_value, validate_subscan_payload};
     use crate::errors::DecodeError;
+    use crate::types::EventType;
 
     #[test]
     fn parses_subscan_transfer_payload() {
@@ -231,7 +254,7 @@ mod tests {
             }
         });
 
-        let events = extract_transfer_event(&payload);
+        let events = extract_events(&payload);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].token.as_deref(), Some("DOT"));
         assert_eq!(events[0].to.as_deref(), Some("1to"));
@@ -311,7 +334,7 @@ mod tests {
             }
         });
 
-        let events = extract_transfer_event(&payload);
+        let events = extract_events(&payload);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].from.as_deref(), Some("1from"));
         assert_eq!(events[0].to.as_deref(), Some("1to"));
@@ -327,5 +350,26 @@ mod tests {
             ]
         });
         assert_eq!(find_param_value(&payload, "value").as_deref(), Some("123"));
+    }
+
+    #[test]
+    fn parses_unsupported_event() {
+        let payload = json!({
+            "code": 0,
+            "data": {
+                "call_module": "timestamp",
+                "call_module_function": "set",
+                "params": [
+                    { "name": "now", "value": 1690000000000u64 }
+                ]
+            }
+        });
+
+        let events = extract_events(&payload);
+        assert_eq!(events.len(), 1);
+        assert!(matches!(events[0].event_type, EventType::Unsupported));
+        assert_eq!(events[0].raw_program.as_deref(), Some("timestamp_set"));
+        assert_eq!(events[0].amount, None);
+        assert_eq!(events[0].token, None);
     }
 }
